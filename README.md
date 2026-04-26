@@ -1,79 +1,50 @@
-# Trading Engine API
+# Trading Platform
 
-A backend simulation of a stock trading platform built with **ASP.NET Core**.
-The project demonstrates how a simplified trading system works, including order placement, order matching, trade execution, and portfolio tracking.
-
-## Features
-
-* Place **buy and sell orders**
-* **Order book** management
-* **Order matching engine**
-* Trade execution
-* User portfolio and balance tracking
-* REST API for trading operations
+A full-stack trading platform with real-time order matching, built with .NET 9 and React 18.
 
 ## Tech Stack
 
-* **ASP.NET Core Web API**
-* **C#**
-* **Entity Framework Core**
-* **SQL Server**
+**Backend**
+- .NET 9, ASP.NET Core
+- Clean Architecture + DDD + CQRS (MediatR)
+- Entity Framework Core + SQL Server
+- SignalR (real-time market data & order updates)
+- JWT Authentication
 
-Architecture:
+**Frontend**
+- React 18 + TypeScript + Vite
+- Zustand (global state) + TanStack Query (server state)
+- Tailwind CSS + shadcn/ui
+- SignalR client
 
-* Clean Architecture
-* Domain-Driven Design (DDD)
-* Repository Pattern
+## Getting Started
 
-## Project Structure
+### Prerequisites
+- .NET 9 SDK
+- Node.js 20+
+- SQL Server
 
-```
-TradingPlatform.API
-TradingPlatform.Application
-TradingPlatform.Domain
-TradingPlatform.Infrastructure
-```
+### Backend
 
-* **API** – HTTP endpoints and controllers
-* **Application** – business logic and use cases
-* **Domain** – core entities and domain rules
-* **Infrastructure** – database and external integrations
-
-## Example Endpoints
-
-Create order
-
-```
-POST /orders
+```bash
+cd TradingPlatformBackend
+dotnet restore
+dotnet ef database update --project TradingPlatform.Infrastructure --startup-project TradingEngineApi
+dotnet run --project TradingEngineApi
 ```
 
-Get order book
+### Frontend
 
-```
-GET /orderbook/{symbol}
-```
-
-Get trade history
-
-```
-GET /trades
+```bash
+cd TradingPlatformFrontend
+npm install
+npm run dev
 ```
 
-Get user portfolio
+## Features
 
-```
-GET /portfolio
-```
-
-## Purpose
-
-This project is intended as a **learning and portfolio project** to explore:
-
-* backend architecture
-* trading system fundamentals
-* order matching algorithms
-* scalable API design
-
-## License
-
-MIT
+- 🔐 JWT Authentication (register, login)
+- 📈 Real-time order book via SignalR
+- ⚡ Sharded matching engine (Channel<T> per symbol)
+- 📊 Live trade history & portfolio positions
+- 🌙 Dark theme UI
