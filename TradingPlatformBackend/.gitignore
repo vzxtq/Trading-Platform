@@ -1,0 +1,208 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options directory
+.vs/
+
+# Visual Studio Code cache/options directory
+.vscode/
+
+# Rider IDE
+.idea/
+*.sln.iml
+
+# ReSharper is a .NET coding add-in
+.resharper
+.resharper.user
+*.resharper.user
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper is a .NET coding add-in
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# TestResults from unit tests or coverage tools
+TestResults/
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUnit 3 - Generator properties
+.nunit.nuproj.user
+
+# Nuget personal use only message
+nuget.config
+!.nuget/NuGet.Config
+.nuget/NuGet.exe
+.nuget/packages/
+.nuget/packages.lock.json
+
+# NuGet v3's project.json files makes some of the build files incompatible with earlier versions of NuGet.
+project.json
+project.lock.json
+
+# Miscellaneous temp files
+*.class
+*.log
+*.jar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.exe
+
+# Entity Framework
+*.edmx.diagram
+
+# Build folder
+artifacts/
+publish/
+
+# App Insights Telemetry
+ApplicationInsights.config
+
+# Local user-specific VS settings
+.localconfig
+
+# Rider cache
+.idea/
+.idea_modules/
+*.iml
+*.iws
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDEs
+.vs/
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build directories
+bin/
+obj/
+dist/
+build/
+
+# Package manager
+packages/
+.packages/
+
+# ASP.NET Core
+launchSettings.json
+appsettings.*.json
+!appsettings.json
+
+# User-specific configuration
+launchSettings.json
+appsettings.local.json
+appsettings.Development.json
+
+# Local user-specific VS settings
+.localconfig
+*.user
+*.userosscache
+*.suo
+
+# Project specific
+TradingPlatform.IntegrationTests/bin/
+TradingPlatform.IntegrationTests/obj/
+TestResults/
+
+
+# IIS
+bin/
+obj/
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OpenCover / CodeCoverage
+OpenCover/
+CodeCoverage/
+
+# Coverage reports
+coverage/
+coverageReport/
+
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/
+
+# Custom user settings
+CustomSettings.json
+
+# Rider specific
+**/.idea/
+**/*.sln.iml
+
+# Build results specific for .NET
+artifacts/
+
+# Cake
+tools/
+**/appsettings.json
+**/bin/
+**/obj/
+*.log
+*.user
+*.vs/
+GEMINI.md
+*.lscache

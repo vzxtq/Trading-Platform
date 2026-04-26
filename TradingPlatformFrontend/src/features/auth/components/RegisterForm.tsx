@@ -1,0 +1,168 @@
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useRegister } from '../api/auth.api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+export const RegisterForm: React.FC = () => {
+  const currencyOptions = [
+    { value: 0, label: 'USD' },
+    { value: 1, label: 'EUR' },
+    { value: 2, label: 'GBP' },
+    { value: 3, label: 'JPY' },
+  ] as const
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    initialBalance: 10000,
+    currency: 0,
+  })
+  const registerMutation = useRegister()
+  const navigate = useNavigate()
+
+  const selectedCurrencyLabel =
+    currencyOptions.find(o => o.value === formData.currency)?.label ?? 'USD'
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    registerMutation.mutate(formData, {
+      onSuccess: (data) => {
+        if (data.success) {
+          navigate('/profile')
+        }
+      }
+    })
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData(prev => ({ 
+      ...prev, 
+      [id]: id === 'initialBalance' ? parseFloat(value) : value 
+    }))
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-black p-4">
+      <Card className="w-full max-w-lg border-neutral-800 bg-[#1a1a1a] text-white">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+          <CardDescription className="text-neutral-400">
+            Start trading in minutes
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Min 8 characters, uppercase, number, sym"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="initialBalance">Initial balance</Label>
+                <Input
+                  id="initialBalance"
+                  type="number"
+                  placeholder="10000"
+                  value={formData.initialBalance}
+                  onChange={handleChange}
+                  required
+                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency</Label>
+                <Select 
+                  value={selectedCurrencyLabel}
+                  onValueChange={(val) => {
+                    const option = currencyOptions.find(o => o.label === val)
+                    if (!option) return
+                    setFormData(prev => ({ ...prev, currency: option.value }))
+                  }}
+                >
+                  <SelectTrigger className="border-neutral-800 bg-[#262626] text-white">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent className="border-neutral-800 bg-[#262626] text-white">
+                    {currencyOptions.map((c) => (
+                      <SelectItem key={c.value} value={c.label}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4 border-t-0 bg-transparent">
+            <Button 
+              type="submit" 
+              className="h-8 w-full bg-neutral-800 text-base leading-none hover:bg-neutral-700"
+              disabled={registerMutation.isPending}
+            >
+              {registerMutation.isPending ? 'Creating account...' : 'Create account'}
+            </Button>
+            
+            {registerMutation.error && (
+              <p className="text-sm text-red-500">{(registerMutation.error as any).message || 'Registration failed'}</p>
+            )}
+
+            <p className="text-center text-sm text-neutral-400">
+              Already have an account? <Link to="/login" className="text-white hover:underline font-semibold">Sign in</Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}
