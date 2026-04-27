@@ -10,7 +10,6 @@ using TradingEngineApi.Extensions;
 
 namespace TradingEngine.Api.Controllers;
 
-
 [Route("api/[controller]")]
 public class AccountsController : ApiController
 {

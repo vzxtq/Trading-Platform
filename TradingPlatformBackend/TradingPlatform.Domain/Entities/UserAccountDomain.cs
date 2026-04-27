@@ -151,6 +151,17 @@ public class UserAccountDomain : AggregateRoot
         UpdatedAt = DateTime.UtcNow;
     }
 
+    // Account is online
+    public void Activate()
+    {
+        if (IsActive)
+            return;
+
+        IsActive = true;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    // Account is offline
     public void Deactivate()
     {
         if (!IsActive)
