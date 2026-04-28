@@ -1,6 +1,10 @@
-import type { OrderBookState } from '../order.types'
+export interface OrderBookStateChangeDto {
+  price: number
+  quantity: number
+  isBuy: boolean
+}
 
 export interface OrderBookNotification {
   symbol: string
-  orderBook: OrderBookState
+  stateChanges: OrderBookStateChangeDto[]
 }

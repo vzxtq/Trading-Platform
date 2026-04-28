@@ -1,15 +1,16 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/api/axios'
-import type { ApiResponse, LoginResponseDto, AccountDto } from '@/types'
+import type { ApiResponse, LoginResponseDto, AccountDto, PositionDto } from '@/types'
 import type { LoginRequest, RegisterRequest } from '../types/auth-requests.types'
 import { useAuthStore } from '@/store/auth'
+import { Currency } from '@/types/enums'
 
 export const useLogin = () => {
   const setAuth = useAuthStore(state => state.setAuth)
 
   return useMutation({
     mutationFn: async (data: LoginRequest) => {
-      const response = await api.post<ApiResponse<LoginResponseDto>>('/Accounts/login', data)
+      const response = await api.post<ApiResponse<LoginResponseDto>>('/accounts/login', data)
       return response.data
     },
     onSuccess: (response) => {
@@ -26,7 +27,10 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (data: RegisterRequest) => {
-      const response = await api.post<ApiResponse<LoginResponseDto>>('/Accounts/register', data)
+      const response = await api.post<ApiResponse<LoginResponseDto>>('/accounts/register', {
+        ...data,
+        currency: Currency[data.currency] // Send as string name for testing
+      })
       return response.data
     },
     onSuccess: (response) => {
@@ -54,7 +58,7 @@ export const usePositions = () => {
   return useQuery({
     queryKey: ['positions'],
     queryFn: async () => {
-      const response = await api.get<ApiResponse<any[]>>('/accounts/positions')
+      const response = await api.get<ApiResponse<PositionDto[]>>('/accounts/positions')
       return response.data.data || []
     },
   })

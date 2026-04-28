@@ -34,7 +34,7 @@ export const RegisterForm: React.FC = () => {
     registerMutation.mutate(formData, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate('/profile')
+          navigate('/dashboard')
         }
       }
     })

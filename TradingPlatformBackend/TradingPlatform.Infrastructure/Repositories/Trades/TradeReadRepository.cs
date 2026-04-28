@@ -37,7 +37,7 @@ public sealed class TradeReadRepository : ITradeReadRepository
             Price = t.Price.Value,
             Quantity = t.Quantity.Value,
             Side = t.BuyerId == userId ? OrderSide.Buy : OrderSide.Sell,
-            ExecutedAt = new DateTimeOffset(t.ExecutedAt).ToUnixTimeMilliseconds()
+            ExecutedAt = t.ExecutedAt.ToUnixTimeMs()
         }).ToList();
     }
 }

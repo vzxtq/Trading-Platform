@@ -5,6 +5,7 @@ import {
   LogLevel,
 } from '@microsoft/signalr'
 import { HUB_PATHS } from '@/lib/constants'
+import { useAuthStore } from '@/store/auth'
 
 function getRequiredEnv(name: string): string {
   const value = import.meta.env[name as keyof ImportMetaEnv]
@@ -28,11 +29,19 @@ class BaseHubConnection {
     const baseUrl = getRequiredEnv('VITE_SIGNALR_URL').replace(/\/+$/, '')
     const hubPath = HUB_PATHS[this.kind]
 
-    return new HubConnectionBuilder()
-      .withUrl(`${baseUrl}${hubPath}`)
+    const builder = new HubConnectionBuilder()
+      .withUrl(`${baseUrl}${hubPath}`, {
+        accessTokenFactory: () => {
+          if (this.kind === 'orders') {
+            return useAuthStore.getState().token || ''
+          }
+          return ''
+        }
+      })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.Information)
-      .build()
+
+    return builder.build()
   }
 
   async connect(): Promise<void> {
@@ -49,6 +58,19 @@ class BaseHubConnection {
     if (!this.connection) return
     if (this.connection.state !== HubConnectionState.Disconnected) {
       await this.connection.stop()
+    }
+  }
+
+  on(eventName: string, handler: (...args: any[]) => void): void {
+    if (!this.connection) {
+      this.connection = this.buildConnection()
+    }
+    this.connection.on(eventName, handler)
+  }
+
+  off(eventName: string, handler: (...args: any[]) => void): void {
+    if (this.connection) {
+      this.connection.off(eventName, handler)
     }
   }
 }

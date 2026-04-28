@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginForm, RegisterForm, ProfilePage, useAuth } from '@/features/auth'
+import { TradingDashboard } from '@/features/trading'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth()
@@ -18,6 +19,14 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <TradingDashboard />
+            </ProtectedRoute>
+          } 
+        />
         <Route 
           path="/profile" 
           element={

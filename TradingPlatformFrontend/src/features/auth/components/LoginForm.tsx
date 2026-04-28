@@ -17,7 +17,7 @@ export const LoginForm: React.FC = () => {
     loginMutation.mutate({ email, password }, {
       onSuccess: (data) => {
         if (data.success) {
-          navigate('/profile')
+          navigate('/dashboard')
         }
       }
     })

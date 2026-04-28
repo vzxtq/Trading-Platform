@@ -24,7 +24,11 @@ namespace TradingEngine.Api
 
             services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.Section));
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                });
             services.AddSignalR();
             services.AddSingleton<IMarketDataNotifier, SignalRMarketDataNotifier>();
 

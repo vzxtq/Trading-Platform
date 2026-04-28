@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingEngine.Domain.Entities;
 using TradingEngine.Domain.ValueObjects;
 
@@ -28,28 +30,59 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
             .IsRequired()
             .HasConversion<string>();
 
+        // Converters and Comparers for Value Objects
+        var symbolConverter = new ValueConverter<Symbol, string>(
+            v => v.Value,
+            v => new Symbol(v));
+        var symbolComparer = new ValueComparer<Symbol>(
+            (l, r) => l.Value == r.Value,
+            s => s.Value.GetHashCode(),
+            s => new Symbol(s.Value));
+
+        var priceConverter = new ValueConverter<Price, decimal>(
+            v => v.Value,
+            v => new Price(v));
+        var priceComparer = new ValueComparer<Price>(
+            (l, r) => l.Value == r.Value,
+            p => p.Value.GetHashCode(),
+            p => new Price(p.Value));
+
+        var quantityConverter = new ValueConverter<Quantity, decimal>(
+            v => v.Value,
+            v => new Quantity(v));
+        var quantityComparer = new ValueComparer<Quantity>(
+            (l, r) => l.Value == r.Value,
+            q => q.Value.GetHashCode(),
+            q => new Quantity(q.Value));
+
         builder.Property(o => o.Symbol)
-               .HasConversion(
-                   v => v.Value,
-                   v => new Symbol(v))
+               .HasConversion(symbolConverter)
+               .Metadata.SetValueComparer(symbolComparer);
+        builder.Property(o => o.Symbol)
                .HasColumnName("Symbol")
                .HasMaxLength(10)
                .IsRequired();
 
         builder.Property(o => o.Price)
-               .HasConversion(v => v.Value, v => new Price(v))
+               .HasConversion(priceConverter)
+               .Metadata.SetValueComparer(priceComparer);
+        builder.Property(o => o.Price)
                .HasColumnName("Price")
                .HasPrecision(18, 8)
                .IsRequired();
 
         builder.Property(o => o.Quantity)
-               .HasConversion(v => v.Value, v => new Quantity(v))
+               .HasConversion(quantityConverter)
+               .Metadata.SetValueComparer(quantityComparer);
+        builder.Property(o => o.Quantity)
                .HasColumnName("Quantity")
                .HasPrecision(18, 8)
                .IsRequired();
 
         builder.Property(o => o.RemainingQuantity)
-               .HasConversion(v => v.Value, v => new Quantity(v))
+               .HasConversion(quantityConverter)
+               .Metadata.SetValueComparer(quantityComparer);
+        builder.Property(o => o.RemainingQuantity)
                .HasColumnName("RemainingQuantity")
                .HasPrecision(18, 8)
                .IsRequired();

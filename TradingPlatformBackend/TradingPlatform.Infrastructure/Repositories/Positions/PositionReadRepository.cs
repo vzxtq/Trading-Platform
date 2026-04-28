@@ -27,7 +27,7 @@ public sealed class PositionReadRepository : IPositionReadRepository
             Quantity = p.Quantity.Value,
             AveragePrice = p.AverageCost,
             UnrealizedPnL = 0m,
-            LastUpdated = new DateTimeOffset(p.UpdatedAt ?? p.CreatedAt).ToUnixTimeMilliseconds()
+            LastUpdated = (p.UpdatedAt ?? p.CreatedAt).ToUnixTimeMs()
         }).ToList();
     }
 }

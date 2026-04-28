@@ -1,7 +1,7 @@
 import type { OrderSide } from '@/types/enums/order-side.enum'
 
 export interface TradeDto {
-  id: string
+  tradeId: string
   symbol: string
   price: number
   quantity: number
@@ -13,6 +13,6 @@ export interface PositionDto {
   symbol: string
   quantity: number
   averagePrice: number
-  unrealizedPnl?: number
+  unrealizedPnL: number
+  lastUpdated: number
 }
-

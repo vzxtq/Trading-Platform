@@ -3,6 +3,7 @@ using TradingEngine.Application.Features.Orders.Dtos;
 using TradingEngine.Application.Features.Orders.Repositories;
 using TradingEngine.Infrastructure.Persistence;
 using TradingEngine.Domain.ValueObjects;
+using TradingEngine.Application.Common;
 
 namespace TradingEngine.Infrastructure.Repositories.Orders;
 
@@ -18,14 +19,14 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
     public async Task<OrderBookDto> GetOrderBookAsync(Symbol symbol, CancellationToken cancellationToken)
     {
         var buyOrders = await _dbContext.Orders
-            .Where(o => o.Symbol.Value == symbol.Value && o.Side == Domain.Enums.OrderSide.Buy)
-            .OrderByDescending(o => o.Price.Value)
+            .Where(o => o.Symbol == symbol && o.Side == Domain.Enums.OrderSide.Buy)
+            .OrderByDescending(o => EF.Property<decimal>(o, "Price"))
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
         var sellOrders = await _dbContext.Orders
-            .Where(o => o.Symbol.Value == symbol.Value && o.Side == Domain.Enums.OrderSide.Sell)
-            .OrderBy(o => o.Price.Value)
+            .Where(o => o.Symbol == symbol && o.Side == Domain.Enums.OrderSide.Sell)
+            .OrderBy(o => EF.Property<decimal>(o, "Price"))
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
@@ -47,9 +48,6 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
         RemainingQuantity = o.RemainingQuantity.Value,
         Side = o.Side,
         Status = o.Status,
-        CreatedAt = new DateTimeOffset(o.CreatedAt).ToUnixTimeMilliseconds(),
-        UpdatedAt = o.UpdatedAt.HasValue 
-            ? new DateTimeOffset(o.UpdatedAt.Value).ToUnixTimeMilliseconds() 
-            : null
-    };
+        CreatedAt = o.CreatedAt.ToUnixTimeMs(),
+        UpdatedAt = o.UpdatedAt.ToUnixTimeMs()    };
 }

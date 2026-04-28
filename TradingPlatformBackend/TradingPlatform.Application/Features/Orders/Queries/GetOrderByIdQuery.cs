@@ -36,10 +36,8 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, Result<
             RemainingQuantity = order.RemainingQuantity.Value,
             Side = order.Side,
             Status = order.Status,
-            CreatedAt = new DateTimeOffset(order.CreatedAt).ToUnixTimeMilliseconds(),
-            UpdatedAt = order.UpdatedAt.HasValue 
-                ? new DateTimeOffset(order.UpdatedAt.Value).ToUnixTimeMilliseconds() 
-                : null
+            CreatedAt = order.CreatedAt.ToUnixTimeMs(),
+            UpdatedAt = order.UpdatedAt.ToUnixTimeMs()
         });
     }
 }
