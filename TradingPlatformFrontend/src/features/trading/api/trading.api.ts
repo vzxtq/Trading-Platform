@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/api/axios'
 import type { ApiResponse, OrderBookResponse, OrderDto } from '@/types'
-import { OrderSide } from '@/types/enums/order-side.enum'
 import type { PlaceOrderRequest } from '../types/trading.types'
 import { useOrderBookStore } from '@/store/orderBook'
 import { queryClient } from '@/lib/queryClient'
@@ -38,9 +37,11 @@ export const useOrderBook = (symbol: string) => {
 export const usePlaceOrder = () => {
   return useMutation({
     mutationFn: async (order: PlaceOrderRequest) => {
-      const response = await api.post<ApiResponse<{ orderId: string; status: number; message: string }>>('/orders', {
+      const response = await api.post<ApiResponse<{ orderId: string; status: string; message: string }>>('/orders', {
         ...order,
-        side: OrderSide[order.side] // Send as string name ('Buy' or 'Sell') for testing
+        side: order.side
+      }, {
+        headers: { 'Content-Type': 'application/json' }
       })
       return response.data
     },
@@ -53,7 +54,9 @@ export const usePlaceOrder = () => {
 export const useCancelOrder = () => {
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const response = await api.post<ApiResponse<{ orderId: string; success: boolean; message: string }>>(`/orders/${orderId}/cancel`)
+      const response = await api.post<ApiResponse<{ orderId: string; success: boolean; message: string }>>(`/orders/${orderId}/cancel`, {}, {
+        headers: { 'Content-Type': 'application/json' }
+      })
       return response.data
     },
     onSuccess: () => {
@@ -71,5 +74,15 @@ export const useUserOrders = (userId: string | null) => {
       return response.data.data || []
     },
     enabled: !!userId,
+  })
+}
+
+export const useSymbols = () => {
+  return useQuery({
+    queryKey: ['symbols'],
+    queryFn: async () => {
+      const response = await api.get<ApiResponse<string[]>>('/symbols')
+      return response.data.data || []
+    },
   })
 }

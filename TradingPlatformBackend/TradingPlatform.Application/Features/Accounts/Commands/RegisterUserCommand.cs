@@ -1,6 +1,8 @@
+using Microsoft.Extensions.Options;
 using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Accounts.Dtos;
 using TradingEngine.Application.Interfaces.Accounts;
+using TradingEngine.Application.Options;
 using TradingEngine.Domain.Entities;
 using TradingEngine.Domain.Enums;
 using TradingEngine.Domain.Interfaces;
@@ -22,17 +24,20 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
     private readonly IAccountRepository _accountRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly Application.Interfaces.IJwtTokenGenerator _tokenGenerator;
+    private readonly JwtOptions _jwtOptions;
 
     public RegisterUserCommandHandler(
         IUserIdentityRepository identityRepository,
         IAccountRepository accountRepository,
         IPasswordHasher passwordHasher,
-        Application.Interfaces.IJwtTokenGenerator tokenGenerator)
+        Application.Interfaces.IJwtTokenGenerator tokenGenerator,
+        IOptions<JwtOptions> jwtOptions)
     {
         _identityRepository = identityRepository;
         _accountRepository = accountRepository;
         _passwordHasher = passwordHasher;
         _tokenGenerator = tokenGenerator;
+        _jwtOptions = jwtOptions.Value;
     }
 
     public async Task<Result<LoginResponseDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
@@ -51,13 +56,21 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
         // 2. Create UserIdentity
         var passwordHash = _passwordHasher.HashPassword(request.Password);
         var identity = new UserIdentityDomain(account.Id, passwordHash);
+        
+        var refreshToken = _tokenGenerator.GenerateRefreshToken();
+        var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        identity.UpdateRefreshToken(refreshToken, refreshTokenExpiry);
+
         await _identityRepository.AddAsync(identity, cancellationToken);
 
         var token = _tokenGenerator.GenerateToken(identity);
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes).ToUnixTimeMilliseconds();
 
         return Result<LoginResponseDto>.Success(new LoginResponseDto
         {
             Token = token,
+            RefreshToken = refreshToken,
+            ExpiresAt = expiresAt,
             UserId = account.Id,
             Email = account.Email
         });

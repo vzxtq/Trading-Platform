@@ -9,6 +9,7 @@ namespace TradingEngine.Application.Features.Accounts.Dtos
         public required string Name { get; set; }
         public required Money Balance { get; set; }
         public required Money ReservedBalance { get; set; }
+        public required Money AvailableBalance { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }

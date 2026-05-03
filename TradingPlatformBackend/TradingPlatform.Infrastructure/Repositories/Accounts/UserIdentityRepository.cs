@@ -23,9 +23,27 @@ public sealed class UserIdentityRepository : IUserIdentityRepository
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<UserIdentityDomain?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        return await _dbContext.UserIdentities
+            .FirstOrDefaultAsync(x => x.RefreshToken == refreshToken, cancellationToken);
+    }
+
+    public async Task<UserIdentityDomain?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.UserIdentities
+            .FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+    }
+
     public async Task AddAsync(UserIdentityDomain identity, CancellationToken cancellationToken)
     {
         await _dbContext.UserIdentities.AddAsync(identity, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(UserIdentityDomain identity, CancellationToken cancellationToken)
+    {
+        _dbContext.UserIdentities.Update(identity);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

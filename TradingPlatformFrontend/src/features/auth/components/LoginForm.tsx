@@ -24,11 +24,11 @@ export const LoginForm: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black p-4">
-      <Card className="w-full max-w-md border-neutral-800 bg-[#1a1a1a] text-white">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md border-border bg-card text-foreground">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription className="text-muted-foreground">
             Sign in to your trading account
           </CardDescription>
         </CardHeader>
@@ -43,7 +43,7 @@ export const LoginForm: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-2">
@@ -55,14 +55,14 @@ export const LoginForm: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 border-t-0 bg-transparent">
             <Button 
               type="submit" 
-              className="h-8 w-full bg-neutral-800 text-base leading-none hover:bg-neutral-700"
+              className="h-10 w-full"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? 'Signing in...' : 'Sign in'}
@@ -72,11 +72,11 @@ export const LoginForm: React.FC = () => {
               <p className="text-sm text-red-500">{(loginMutation.error as any).message || 'Login failed'}</p>
             )}
 
-            <p className="text-center text-sm text-neutral-400">
-              Forgot your password? <Link to="/reset" className="text-white hover:underline font-semibold">Reset it</Link>
+            <p className="text-center text-sm text-muted-foreground">
+              Forgot your password? <Link to="/reset" className="text-foreground hover:underline font-semibold">Reset it</Link>
             </p>
-            <p className="text-center text-sm text-neutral-400">
-              Don't have an account? <Link to="/register" className="text-white hover:underline font-semibold">Create account</Link>
+            <p className="text-center text-sm text-muted-foreground">
+              Don't have an account? <Link to="/register" className="text-foreground hover:underline font-semibold">Create account</Link>
             </p>
           </CardFooter>
         </form>

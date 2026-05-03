@@ -18,6 +18,12 @@ public sealed class UserIdentityConfiguration : IEntityTypeConfiguration<UserIde
         builder.Property(x => x.PasswordHash)
                .IsRequired();
 
+        builder.Property(x => x.RefreshToken)
+               .IsRequired(false);
+
+        builder.Property(x => x.RefreshTokenExpiresAt)
+               .IsRequired(false);
+
         builder.Property(x => x.CreatedAt)
                .HasDefaultValueSql("SYSUTCDATETIME()");
     }

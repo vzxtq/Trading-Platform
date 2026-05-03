@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Options;
 using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Accounts.Dtos;
 using TradingEngine.Application.Interfaces;
 using TradingEngine.Application.Interfaces.Accounts;
+using TradingEngine.Application.Options;
 using TradingEngine.Domain.Interfaces;
 
 namespace TradingEngine.Application.Features.Accounts.Commands;
@@ -13,15 +15,18 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
     private readonly IUserIdentityRepository _identityRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _tokenGenerator;
+    private readonly JwtOptions _jwtOptions;
 
     public LoginCommandHandler(
         IUserIdentityRepository identityRepository,
         IPasswordHasher passwordHasher,
-        IJwtTokenGenerator tokenGenerator)
+        IJwtTokenGenerator tokenGenerator,
+        IOptions<JwtOptions> jwtOptions)
     {
         _identityRepository = identityRepository;
         _passwordHasher = passwordHasher;
         _tokenGenerator = tokenGenerator;
+        _jwtOptions = jwtOptions.Value;
     }
 
     public async Task<Result<LoginResponseDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -38,11 +43,21 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, Result<L
         }
 
         var token = _tokenGenerator.GenerateToken(identity);
+        var refreshToken = _tokenGenerator.GenerateRefreshToken();
+        var refreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+        identity.UpdateRefreshToken(refreshToken, refreshTokenExpiry);
+        await _identityRepository.UpdateAsync(identity, cancellationToken);
+
+        var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_jwtOptions.ExpiryMinutes).ToUnixTimeMilliseconds();
 
         return Result<LoginResponseDto>.Success(new LoginResponseDto
         {
             Token = token,
-            UserId = identity.UserId
+            RefreshToken = refreshToken,
+            ExpiresAt = expiresAt,
+            UserId = identity.UserId,
+            Email = request.Email
         });
     }
 }

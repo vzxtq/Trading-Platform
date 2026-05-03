@@ -5,4 +5,5 @@ namespace TradingEngine.Application.Interfaces;
 public interface IJwtTokenGenerator
 {
     string GenerateToken(UserIdentityDomain identity);
+    string GenerateRefreshToken();
 }

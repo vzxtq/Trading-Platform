@@ -49,5 +49,6 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
         Side = o.Side,
         Status = o.Status,
         CreatedAt = o.CreatedAt.ToUnixTimeMs(),
-        UpdatedAt = o.UpdatedAt.ToUnixTimeMs()    };
+        UpdatedAt = o.UpdatedAt.ToUnixTimeMs()
+    };
 }

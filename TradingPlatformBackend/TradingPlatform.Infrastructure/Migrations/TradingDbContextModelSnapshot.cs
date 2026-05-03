@@ -93,6 +93,11 @@ namespace TradingEngine.Infrastructure.Migrations
                         .HasColumnType("decimal(18,8)")
                         .HasColumnName("Quantity");
 
+                    b.Property<decimal>("ReservedQuantity")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("decimal(18,8)")
+                        .HasColumnName("ReservedQuantity");
+
                     b.Property<string>("Symbol")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -113,6 +118,21 @@ namespace TradingEngine.Infrastructure.Migrations
                         .HasDatabaseName("UX_Positions_User_Symbol");
 
                     b.ToTable("Positions", (string)null);
+                });
+
+            modelBuilder.Entity("TradingEngine.Domain.Entities.SymbolDomain", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Symbols");
                 });
 
             modelBuilder.Entity("TradingEngine.Domain.Entities.TradeDomain", b =>
@@ -237,6 +257,12 @@ namespace TradingEngine.Infrastructure.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");

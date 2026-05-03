@@ -100,9 +100,11 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                     buyPos.Add(qty, price.Value);
                 }
 
-                var sellPos = FindPosition(trade.SellerId, sellOrder.Symbol)
+                var sellPos = FindPosition(trade.SellerId, buyOrder.Symbol)
                               ?? throw new InvalidOperationException("Seller position not found for symbol");
-                sellPos.Reduce(qty);
+
+                // Commitment: Seller already had funds reserved during PlaceOrder
+                sellPos.CommitReserved(qty);
 
                 var executedAt = DateTimeOffset.FromUnixTimeMilliseconds(trade.ExecutedAt).UtcDateTime;
                 var tradeDomain = TradeDomain.Create(
@@ -124,6 +126,9 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                 if (!orders.TryGetValue(stateChange.OrderId, out var order))
                     continue;
 
+                _logger.LogInformation("Processing state change for order {OrderId}: {Status}, Filled: {Filled}", 
+                    stateChange.OrderId, stateChange.Status, stateChange.FilledQuantity);
+
                 var filledBefore = order.Quantity.Value - order.RemainingQuantity.Value;
                 var newlyFilled = stateChange.FilledQuantity - (long)filledBefore;
                 if (newlyFilled > 0)
@@ -131,15 +136,30 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                     order.Fill(new Quantity(newlyFilled));
                 }
 
-                if (stateChange.Status == OrderStatus.Cancelled)
+                if (order.Status != stateChange.Status)
                 {
-                    order.Cancel();
+                    if (stateChange.Status == OrderStatus.Cancelled)
+                    {
+                        order.Cancel();
+                    }
+                    else if (stateChange.Status == OrderStatus.Filled && order.Status != OrderStatus.Filled)
+                    {
+                        if (order.RemainingQuantity.Value == 0)
+                        {
+                            order.Fill(new Quantity(0));
+                        }
+                    }
                 }
 
                 if (order.Side == OrderSide.Buy && stateChange.Status == OrderStatus.Cancelled && stateChange.RemainingQuantity > 0)
                 {
                     var release = new Money(order.Price.Value * stateChange.RemainingQuantity, accounts[order.UserId].Balance.Currency);
                     accounts[order.UserId].ReleaseReservedFunds(release);
+                }
+                else if (order.Side == OrderSide.Sell && stateChange.Status == OrderStatus.Cancelled && stateChange.RemainingQuantity > 0)
+                {
+                    var sellPos = FindPosition(order.UserId, order.Symbol);
+                    sellPos?.ReleaseReserved(new Quantity(stateChange.RemainingQuantity));
                 }
 
                 _dbContext.Orders.Update(order);

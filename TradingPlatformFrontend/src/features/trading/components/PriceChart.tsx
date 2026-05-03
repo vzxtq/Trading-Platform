@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart, ColorType, LineSeries, type ISeriesApi } from 'lightweight-charts'
+import { useThemeStore } from '@/store/theme'
 
 interface PriceChartProps {
   symbol: string
@@ -9,6 +10,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<any>(null)
   const seriesRef = useRef<ISeriesApi<"Line"> | null>(null)
+  const { theme } = useThemeStore()
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -17,19 +19,24 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
       chartRef.current.applyOptions({ width: chartContainerRef.current?.clientWidth })
     }
 
+    const isDark = theme === 'dark'
+    const bgColor = isDark ? '#0a0a0a' : '#ffffff'
+    const textColor = isDark ? '#737373' : '#737373'
+    const gridColor = isDark ? '#1e1e1e' : '#f0f0f0'
+
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#0a0a0a' },
-        textColor: '#737373',
+        background: { type: ColorType.Solid, color: bgColor },
+        textColor: textColor,
       },
       grid: {
-        vertLines: { color: '#1e1e1e' },
-        horzLines: { color: '#1e1e1e' },
+        vertLines: { color: gridColor },
+        horzLines: { color: gridColor },
       },
       width: chartContainerRef.current.clientWidth,
       height: 300,
       timeScale: {
-        borderColor: '#1e1e1e',
+        borderColor: gridColor,
         timeVisible: true,
         secondsVisible: false,
       },
@@ -61,12 +68,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
       window.removeEventListener('resize', handleResize)
       chart.remove()
     }
-  }, [symbol])
+  }, [symbol, theme])
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="p-2 border-b border-[#1e1e1e] flex justify-between items-center bg-[#111]">
-        <span className="text-xs font-bold text-white uppercase tracking-wider">{symbol} / USD</span>
+      <div className="p-2 border-b border-border flex justify-between items-center bg-card">
+        <span className="text-xs font-bold text-foreground uppercase tracking-wider">{symbol} / USD</span>
         <div className="flex gap-2">
             <span className="text-[10px] text-green-500 font-mono">+1.25%</span>
         </div>

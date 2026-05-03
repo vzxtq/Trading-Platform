@@ -49,11 +49,11 @@ export const RegisterForm: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black p-4">
-      <Card className="w-full max-w-lg border-neutral-800 bg-[#1a1a1a] text-white">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-lg border-border bg-card text-foreground">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription className="text-muted-foreground">
             Start trading in minutes
           </CardDescription>
         </CardHeader>
@@ -68,7 +68,7 @@ export const RegisterForm: React.FC = () => {
                   value={formData.firstName}
                   onChange={handleChange}
                   required
-                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                  className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div className="space-y-2">
@@ -79,7 +79,7 @@ export const RegisterForm: React.FC = () => {
                   value={formData.lastName}
                   onChange={handleChange}
                   required
-                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                  className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -92,7 +92,7 @@ export const RegisterForm: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-2">
@@ -104,7 +104,7 @@ export const RegisterForm: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -117,7 +117,7 @@ export const RegisterForm: React.FC = () => {
                   value={formData.initialBalance}
                   onChange={handleChange}
                   required
-                  className="border-neutral-800 bg-[#262626] text-white placeholder:text-neutral-500"
+                  className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div className="space-y-2">
@@ -130,10 +130,10 @@ export const RegisterForm: React.FC = () => {
                     setFormData(prev => ({ ...prev, currency: option.value }))
                   }}
                 >
-                  <SelectTrigger className="border-neutral-800 bg-[#262626] text-white">
+                  <SelectTrigger className="border-border bg-muted text-foreground">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
-                  <SelectContent className="border-neutral-800 bg-[#262626] text-white">
+                  <SelectContent className="border-border bg-muted text-foreground">
                     {currencyOptions.map((c) => (
                       <SelectItem key={c.value} value={c.label}>
                         {c.label}
@@ -147,7 +147,7 @@ export const RegisterForm: React.FC = () => {
           <CardFooter className="flex flex-col space-y-4 border-t-0 bg-transparent">
             <Button 
               type="submit" 
-              className="h-8 w-full bg-neutral-800 text-base leading-none hover:bg-neutral-700"
+              className="h-10 w-full"
               disabled={registerMutation.isPending}
             >
               {registerMutation.isPending ? 'Creating account...' : 'Create account'}
@@ -157,8 +157,8 @@ export const RegisterForm: React.FC = () => {
               <p className="text-sm text-red-500">{(registerMutation.error as any).message || 'Registration failed'}</p>
             )}
 
-            <p className="text-center text-sm text-neutral-400">
-              Already have an account? <Link to="/login" className="text-white hover:underline font-semibold">Sign in</Link>
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account? <Link to="/login" className="text-foreground hover:underline font-semibold">Sign in</Link>
             </p>
           </CardFooter>
         </form>

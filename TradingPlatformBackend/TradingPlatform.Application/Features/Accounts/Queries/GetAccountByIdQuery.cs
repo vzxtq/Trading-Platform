@@ -2,7 +2,6 @@
 using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Accounts.Dtos;
 using TradingEngine.Application.Interfaces.Accounts;
-using TradingEngine.Application.Common;
 
 namespace TradingEngine.Application.Features.Accounts.Queries
 {

@@ -34,6 +34,12 @@ public sealed class PositionConfiguration : IEntityTypeConfiguration<PositionDom
                .HasPrecision(18, 8)
                .IsRequired();
 
+        builder.Property(p => p.ReservedQuantity)
+               .HasConversion(v => v.Value, v => new Quantity(v))
+               .HasColumnName("ReservedQuantity")
+               .HasPrecision(18, 8)
+               .IsRequired();
+
         builder.Property(p => p.AverageCost)
                .HasPrecision(18, 8)
                .IsRequired();

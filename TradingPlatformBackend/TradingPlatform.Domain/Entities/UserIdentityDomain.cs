@@ -6,6 +6,8 @@ public sealed class UserIdentityDomain : BaseEntity
 {
     public Guid UserId { get; private set; }
     public string PasswordHash { get; private set; } = null!;
+    public string? RefreshToken { get; private set; }
+    public DateTime? RefreshTokenExpiresAt { get; private set; }
 
     private UserIdentityDomain() { }
 
@@ -15,5 +17,26 @@ public sealed class UserIdentityDomain : BaseEntity
         UserId = userId;
         PasswordHash = passwordHash;
         CreatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateRefreshToken(string token, DateTime expiry)
+    {
+        RefreshToken = token;
+        RefreshTokenExpiresAt = expiry;
+    }
+
+    public void InvalidateRefreshToken()
+    {
+        RefreshToken = null;
+        RefreshTokenExpiresAt = null;
+    }
+
+    public void UpdatePassword(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new ArgumentException("Password hash cannot be empty.");
+        
+        PasswordHash = passwordHash;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

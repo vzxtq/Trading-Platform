@@ -3,8 +3,10 @@ import { Currency } from './enums'
 
 export const LoginResponseDtoSchema = z.object({
   token: z.string(),
+  refreshToken: z.string(),
+  expiresAt: z.number(),
   userId: z.string().uuid(),
-  email: z.string().email(),
+  email: z.string().email().nullable(),
 })
 
 export type LoginResponseDto = z.infer<typeof LoginResponseDtoSchema>
@@ -22,6 +24,7 @@ export const AccountDtoSchema = z.object({
   name: z.string(),
   balance: BalanceDtoSchema,
   reservedBalance: BalanceDtoSchema,
+  availableBalance: BalanceDtoSchema,
   lastLoginAt: z.string().nullable(),
   isActive: z.boolean(),
   createdAt: z.string(),

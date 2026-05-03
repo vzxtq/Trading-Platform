@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Trades.Dtos;
 using TradingEngine.Application.Interfaces.Trades;
 using TradingEngine.Domain.Enums;

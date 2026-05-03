@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/api/axios'
 import type { ApiResponse, LoginResponseDto, AccountDto, PositionDto } from '@/types'
-import type { LoginRequest, RegisterRequest } from '../types/auth-requests.types'
+import type { LoginRequest, RegisterRequest, UpdateProfileRequest, UpdatePasswordRequest } from '../types/auth-requests.types'
 import { useAuthStore } from '@/store/auth'
 import { Currency } from '@/types/enums'
 
@@ -15,8 +15,8 @@ export const useLogin = () => {
     },
     onSuccess: (response) => {
       if (response.success && response.data) {
-        const { token, userId, email } = response.data
-        setAuth(token, userId, email)
+        const { token, refreshToken, userId, email } = response.data
+        setAuth(token, refreshToken, userId, email)
       }
     },
   })
@@ -35,9 +35,27 @@ export const useRegister = () => {
     },
     onSuccess: (response) => {
       if (response.success && response.data) {
-        const { token, userId, email } = response.data
-        setAuth(token, userId, email)
+        const { token, refreshToken, userId, email } = response.data
+        setAuth(token, refreshToken, userId, email)
       }
+    },
+  })
+}
+
+export const useUpdateProfile = () => {
+  return useMutation({
+    mutationFn: async (data: UpdateProfileRequest) => {
+      const response = await api.put<ApiResponse<null>>('/accounts/me', data)
+      return response.data
+    },
+  })
+}
+
+export const useUpdatePassword = () => {
+  return useMutation({
+    mutationFn: async (data: Omit<UpdatePasswordRequest, 'confirmPassword'>) => {
+      const response = await api.put<ApiResponse<null>>('/accounts/me/password', data)
+      return response.data
     },
   })
 }

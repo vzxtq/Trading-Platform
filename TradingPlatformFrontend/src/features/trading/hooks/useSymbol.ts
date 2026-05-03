@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useSelectedSymbol } from './useSelectedSymbol'
 
 export function useSymbol() {
-  const [symbol, setSymbol] = useState('AAPL') // Default symbol
-  return { symbol, setSymbol }
+  const { selectedSymbol, setSelectedSymbol } = useSelectedSymbol()
+  
+  return { symbol: selectedSymbol, setSymbol: setSelectedSymbol }
 }

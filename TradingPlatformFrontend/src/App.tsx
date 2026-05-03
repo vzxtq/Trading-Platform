@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useLayoutEffect } from 'react'
 import { LoginForm, RegisterForm, ProfilePage, useAuth } from '@/features/auth'
 import { TradingDashboard } from '@/features/trading'
+import { Toaster } from "@/components/ui/sonner"
+import { useThemeStore } from '@/store/theme'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth()
@@ -13,6 +16,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 }
 
 function App() {
+  const { theme } = useThemeStore()
+
+  useLayoutEffect(() => {
+    const root = window.document.documentElement
+    root.classList.remove('light', 'dark')
+    root.classList.add(theme)
+  }, [theme])
+
   return (
     <BrowserRouter>
       <Routes>
@@ -38,6 +49,7 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      <Toaster position="top-right" richColors closeButton theme={theme} />
     </BrowserRouter>
   )
 }

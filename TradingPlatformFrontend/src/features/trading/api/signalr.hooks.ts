@@ -15,7 +15,7 @@ export function useMarketDataSignalR(symbol: string) {
 
     const handleTrade = (notification: TradeNotification) => {
       addTrade({
-        id: Math.random().toString(),
+        tradeId: Math.random().toString(),
         symbol: notification.symbol,
         price: notification.price,
         quantity: notification.quantity,

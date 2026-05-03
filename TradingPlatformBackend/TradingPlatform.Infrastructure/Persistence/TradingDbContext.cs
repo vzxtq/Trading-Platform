@@ -29,6 +29,7 @@ namespace TradingEngine.Infrastructure.Persistence
         public DbSet<OrderDomain> Orders => Set<OrderDomain>();
         public DbSet<TradeDomain> Trades => Set<TradeDomain>();
         public DbSet<PositionDomain> Positions => Set<PositionDomain>();
+        public DbSet<SymbolDomain> Symbols => Set<SymbolDomain>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

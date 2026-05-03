@@ -12,7 +12,10 @@ public class PositionDomain : BaseEntity
     public Guid UserId { get; private set; }
     public Symbol Symbol { get; private set; } = null!;
     public Quantity Quantity { get; private set; } = null!;
+    public Quantity ReservedQuantity { get; private set; } = null!;
     public decimal AverageCost { get; private set; }
+
+    public Quantity AvailableQuantity => new Quantity(Quantity.Value - ReservedQuantity.Value);
 
     private PositionDomain()
     { }
@@ -31,6 +34,7 @@ public class PositionDomain : BaseEntity
             UserId = userId,
             Symbol = symbol,
             Quantity = quantity,
+            ReservedQuantity = new Quantity(0),
             AverageCost = averageCost,
             CreatedAt = DateTime.UtcNow
         };
@@ -56,15 +60,35 @@ public class PositionDomain : BaseEntity
         if (quantity.IsGreaterThan(Quantity))
             throw new InvalidOperationException("Cannot reduce position more than current quantity");
 
-        if (quantity.IsEqual(Quantity))
-        {
-            Quantity = new Quantity(0); // This would normally trigger removal
-        }
-        else
-        {
-            Quantity = Quantity.Subtract(quantity);
-        }
+        Quantity = Quantity.Subtract(quantity);
+        UpdatedAt = DateTime.UtcNow;
+    }
 
+    public void Reserve(Quantity quantity)
+    {
+        if (quantity.IsGreaterThan(AvailableQuantity))
+            throw new InvalidOperationException("Insufficient available position quantity to reserve.");
+
+        ReservedQuantity = new Quantity(ReservedQuantity.Value + quantity.Value);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void ReleaseReserved(Quantity quantity)
+    {
+        if (quantity.IsGreaterThan(ReservedQuantity))
+            throw new InvalidOperationException("Cannot release more than reserved quantity.");
+
+        ReservedQuantity = new Quantity(ReservedQuantity.Value - quantity.Value);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void CommitReserved(Quantity quantity)
+    {
+        if (quantity.IsGreaterThan(ReservedQuantity))
+            throw new InvalidOperationException("Cannot commit more than reserved quantity.");
+
+        ReservedQuantity = new Quantity(ReservedQuantity.Value - quantity.Value);
+        Quantity = Quantity.Subtract(quantity);
         UpdatedAt = DateTime.UtcNow;
     }
 

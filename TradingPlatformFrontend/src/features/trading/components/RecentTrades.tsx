@@ -18,7 +18,7 @@ export const RecentTrades: React.FC<RecentTradesProps> = ({ symbol }) => {
 
   return (
     <div className="flex-1 flex flex-col text-[11px] font-mono overflow-hidden">
-      <div className="p-2 border-b border-[#1e1e1e] bg-[#151515] flex justify-between text-neutral-500 font-bold uppercase tracking-wider">
+      <div className="p-2 border-b border-border bg-muted flex justify-between text-muted-foreground font-bold uppercase tracking-wider">
         <span className="w-1/3 text-left">Price</span>
         <span className="w-1/3 text-right">Size</span>
         <span className="w-1/3 text-right">Time</span>
@@ -26,14 +26,14 @@ export const RecentTrades: React.FC<RecentTradesProps> = ({ symbol }) => {
 
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {filteredTrades.map((trade, i) => (
-          <div key={`${trade.tradeId}-${i}`} className="flex justify-between items-center px-2 h-6 hover:bg-neutral-800 transition-colors">
+          <div key={`${trade.tradeId}-${i}`} className="flex justify-between items-center px-2 h-6 hover:bg-accent transition-colors">
             <span className={`w-1/3 text-left ${trade.side === OrderSide.Buy ? 'text-green-500' : 'text-red-500'}`}>
               {trade.price.toFixed(2)}
             </span>
-            <span className="w-1/3 text-right text-neutral-300">
+            <span className="w-1/3 text-right text-foreground">
               {trade.quantity.toFixed(4)}
             </span>
-            <span className="w-1/3 text-right text-neutral-500">
+            <span className="w-1/3 text-right text-muted-foreground">
               {formatTime(trade.executedAt)}
             </span>
           </div>

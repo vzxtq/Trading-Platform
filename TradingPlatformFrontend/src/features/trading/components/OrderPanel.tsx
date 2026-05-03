@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAuthStore } from '@/store/auth'
-import { useAccount } from '@/features/auth/api/auth.api'
+import { useAccount, usePositions } from '@/features/auth/api/auth.api'
 import { usePlaceOrder } from '../api/trading.api'
 import { OrderSide } from '@/types/enums/order-side.enum'
 import { Button } from '@/components/ui/button'
@@ -14,26 +14,28 @@ interface OrderPanelProps {
 export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
   const { userId } = useAuthStore()
   const { data: account } = useAccount(userId)
+  const { data: positions } = usePositions()
   const [side, setSide] = useState<OrderSide>(OrderSide.Buy)
   const [price, setPrice] = useState('')
   const [quantity, setQuantity] = useState('')
   const placeOrder = usePlaceOrder()
 
+  const currentPosition = positions?.find(p => p.symbol === symbol)
+
   const total = parseFloat(price || '0') * parseFloat(quantity || '0')
   const fee = total * 0.001
 
   const handleQuickFill = (percent: number) => {
-    if (!account) return
-    const available = account.balance.amount
     if (side === OrderSide.Buy) {
+        if (!account) return
+        const available = account.availableBalance.amount
         const p = parseFloat(price)
         if (p > 0) {
             setQuantity(((available * percent) / p).toFixed(4))
         }
     } else {
-        // For sell, we'd need position size, but prompt says available balance from useAuthStore
-        // I'll just use balance as a placeholder for now
-        setQuantity((available * percent).toFixed(4))
+        const availableQuantity = currentPosition?.quantity || 0
+        setQuantity((availableQuantity * percent).toFixed(4))
     }
   }
 
@@ -53,15 +55,15 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
 
   return (
     <div className="flex-1 flex flex-col p-4 space-y-4">
-      <div className="flex bg-[#1a1a1a] rounded-md p-1">
+      <div className="flex bg-muted rounded-md p-1">
         <button
-          className={`flex-1 py-1.5 text-xs font-bold rounded ${side === OrderSide.Buy ? 'bg-green-600 text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`flex-1 py-1.5 text-xs font-bold rounded ${side === OrderSide.Buy ? 'bg-green-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
           onClick={() => setSide(OrderSide.Buy)}
         >
           BUY
         </button>
         <button
-          className={`flex-1 py-1.5 text-xs font-bold rounded ${side === OrderSide.Sell ? 'bg-red-600 text-white' : 'text-neutral-400 hover:text-white'}`}
+          className={`flex-1 py-1.5 text-xs font-bold rounded ${side === OrderSide.Sell ? 'bg-red-600 text-white' : 'text-muted-foreground hover:text-foreground'}`}
           onClick={() => setSide(OrderSide.Sell)}
         >
           SELL
@@ -70,14 +72,19 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
 
       <div className="space-y-4">
         <div className="flex justify-between text-[11px]">
-          <span className="text-neutral-500 uppercase font-bold">Available</span>
-          <span className="text-white font-mono">
-            {account?.balance.amount.toLocaleString()} {account?.balance.currency === 0 ? 'USD' : 'EUR'}
+          <span className="text-muted-foreground uppercase font-bold">
+            {side === OrderSide.Buy ? 'Available Balance' : 'Available Position'}
+          </span>
+          <span className="text-foreground font-mono">
+            {side === OrderSide.Buy 
+              ? `${account?.availableBalance?.amount.toLocaleString()} ${account?.availableBalance?.currency === 0 ? 'USD' : 'EUR'}`
+              : `${currentPosition?.quantity || 0} ${symbol.split('/')[0]}`
+            }
           </span>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="price" className="text-[10px] uppercase text-neutral-500 font-bold">Price</Label>
+          <Label htmlFor="price" className="text-[10px] uppercase text-muted-foreground font-bold">Price</Label>
           <div className="relative">
             <Input
               id="price"
@@ -85,14 +92,14 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="bg-[#0a0a0a] border-[#1e1e1e] text-white font-mono h-9"
+              className="bg-background border-border text-foreground font-mono h-9"
             />
-            <span className="absolute right-3 top-2 text-[10px] text-neutral-500 font-bold uppercase">USD</span>
+            <span className="absolute right-3 top-2 text-[10px] text-muted-foreground font-bold uppercase">USD</span>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="quantity" className="text-[10px] uppercase text-neutral-500 font-bold">Quantity</Label>
+          <Label htmlFor="quantity" className="text-[10px] uppercase text-muted-foreground font-bold">Quantity</Label>
           <div className="relative">
             <Input
               id="quantity"
@@ -100,9 +107,9 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
               step="0.0001"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="bg-[#0a0a0a] border-[#1e1e1e] text-white font-mono h-9"
+              className="bg-background border-border text-foreground font-mono h-9"
             />
-            <span className="absolute right-3 top-2 text-[10px] text-neutral-500 font-bold uppercase">{symbol}</span>
+            <span className="absolute right-3 top-2 text-[10px] text-muted-foreground font-bold uppercase">{symbol}</span>
           </div>
         </div>
 
@@ -111,21 +118,21 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
             <button
               key={p}
               onClick={() => handleQuickFill(p)}
-              className="bg-[#1a1a1a] hover:bg-[#262626] text-[10px] py-1 rounded border border-[#1e1e1e] text-neutral-400 transition-colors"
+              className="bg-muted hover:bg-accent text-[10px] py-1 rounded border border-border text-muted-foreground transition-colors"
             >
               {p * 100}%
             </button>
           ))}
         </div>
 
-        <div className="pt-4 border-t border-[#1e1e1e] space-y-1.5 text-[11px]">
+        <div className="pt-4 border-t border-border space-y-1.5 text-[11px]">
           <div className="flex justify-between">
-            <span className="text-neutral-500 uppercase font-bold">Total</span>
-            <span className="text-white font-mono">{total.toFixed(2)} USD</span>
+            <span className="text-muted-foreground uppercase font-bold">Total</span>
+            <span className="text-foreground font-mono">{total.toFixed(2)} USD</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-neutral-500 uppercase font-bold">Fee (0.1%)</span>
-            <span className="text-white font-mono">{fee.toFixed(2)} USD</span>
+            <span className="text-muted-foreground uppercase font-bold">Fee (0.1%)</span>
+            <span className="text-foreground font-mono">{fee.toFixed(2)} USD</span>
           </div>
         </div>
 

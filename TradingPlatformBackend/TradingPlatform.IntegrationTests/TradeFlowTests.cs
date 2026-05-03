@@ -134,6 +134,75 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
         trades.Should().HaveCount(1);
         trades[0].Price.Value.Should().Be(50000);
         trades[0].Quantity.Value.Should().Be(1);
+
+        // Verify Position updates
+        var sellerId = trades[0].SellerId;
+        var buyerId = trades[0].BuyerId;
+        var btcSymbol = new Symbol("BTCUSD");
+
+        var sellerPos = await verifyContext.Positions.FirstOrDefaultAsync(p => p.UserId == sellerId && p.Symbol == btcSymbol);
+        sellerPos.Should().NotBeNull();
+        sellerPos!.Quantity.Value.Should().Be(9); // 10 seeded - 1 sold
+        sellerPos.AverageCost.Should().Be(40000); // Should not change on sell
+
+        var buyerPos = await verifyContext.Positions.FirstOrDefaultAsync(p => p.UserId == buyerId && p.Symbol == btcSymbol);
+        buyerPos.Should().NotBeNull();
+        buyerPos!.Quantity.Value.Should().Be(1);
+        buyerPos.AverageCost.Should().Be(50000); // 1st purchase at 50000
+    }
+
+    [Fact]
+    public async Task CompleteTradeFlow_SellAll_ShouldKeepPositionWithZeroQuantity()
+    {
+        await _factory.InitializeDatabaseAsync();
+        var testEmails = new[] { "buyer_all@test.com", "seller_all@test.com" };
+
+        // Clean up
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<TradingDbContext>();
+            var accounts = await context.UserAccounts.Where(a => testEmails.Contains(a.Email)).ToListAsync();
+            foreach (var acc in accounts)
+            {
+                var accountIds = new[] { acc.Id };
+                context.Orders.RemoveRange(await context.Orders.Where(o => accountIds.Contains(o.UserId)).ToListAsync());
+                context.Trades.RemoveRange(await context.Trades.Where(t => accountIds.Contains(t.BuyerId) || accountIds.Contains(t.SellerId)).ToListAsync());
+                context.UserIdentities.RemoveRange(await context.UserIdentities.Where(i => accountIds.Contains(i.UserId)).ToListAsync());
+                context.Positions.RemoveRange(await context.Positions.Where(p => accountIds.Contains(p.UserId)).ToListAsync());
+            }
+            context.UserAccounts.RemoveRange(accounts);
+            await context.SaveChangesAsync();
+        }
+
+        var buyerToken = await RegisterAndLoginAsync("buyer_all@test.com", "Buyer123!", "Buyer", "All");
+        var sellerToken = await RegisterAndLoginAsync("seller_all@test.com", "Seller123!", "Seller", "All");
+
+        // Seed Seller position with exactly what they will sell
+        Guid sellerId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<TradingDbContext>();
+            var seller = await context.UserAccounts.FirstAsync(a => a.Email == "seller_all@test.com");
+            sellerId = seller.Id;
+            var position = PositionDomain.Create(sellerId, new Symbol("AAPL"), new Quantity(5), 150);
+            context.Positions.Add(position!);
+            await context.SaveChangesAsync();
+        }
+
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", buyerToken);
+        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160, Quantity = 5, Side = OrderSide.Buy });
+
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sellerToken);
+        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160, Quantity = 5, Side = OrderSide.Sell });
+
+        await Task.Delay(2000);
+
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyContext = verifyScope.ServiceProvider.GetRequiredService<TradingDbContext>();
+        var sellerPos = await verifyContext.Positions.FirstOrDefaultAsync(p => p.UserId == sellerId && p.Symbol == new Symbol("AAPL"));
+        
+        sellerPos.Should().NotBeNull();
+        sellerPos!.Quantity.Value.Should().Be(0);
     }
 
     private async Task<string> RegisterAndLoginAsync(string email, string password, string first, string last)

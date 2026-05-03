@@ -32,6 +32,7 @@ namespace TradingEngine.Infrastructure.Repositories.Accounts
                 Name = account.FullName,
                 Balance = account.Balance,
                 ReservedBalance = account.ReservedBalance,
+                AvailableBalance = account.AvailableBalance,
                 LastLoginAt = account.LastLoginAt,
                 IsActive = account.IsActive,
                 CreatedAt = account.CreatedAt

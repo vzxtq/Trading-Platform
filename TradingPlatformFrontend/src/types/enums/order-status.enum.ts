@@ -1,7 +1,7 @@
 export enum OrderStatus { 
-    Open = 1,
-    PartiallyFilled = 2,
-    Filled = 3, 
-    Cancelled = 4, 
-    Rejected = 5
+    Open = "Open",
+    PartiallyFilled = "PartiallyFilled",
+    Filled = "Filled", 
+    Cancelled = "Cancelled", 
+    Rejected = "Rejected"
 }

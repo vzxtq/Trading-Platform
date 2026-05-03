@@ -7,11 +7,13 @@ using TradingEngine.Application.Interfaces;
 using TradingEngine.Application.Interfaces.Accounts;
 using TradingEngine.Application.Interfaces.Orders;
 using TradingEngine.Application.Interfaces.Positions;
+using TradingEngine.Application.Interfaces.Symbols;
 using TradingEngine.Application.Interfaces.Trades;
 using TradingEngine.Application.Options;
 using TradingEngine.Domain.Interfaces;
 using TradingEngine.Infrastructure.Handlers;
 using TradingEngine.Infrastructure.Persistence;
+using TradingEngine.Infrastructure.Repositories;
 using TradingEngine.Infrastructure.Repositories.Accounts;
 using TradingEngine.Infrastructure.Repositories.Orders;
 using TradingEngine.Infrastructure.Repositories.Positions;
@@ -44,8 +46,10 @@ public static class InfrustructureDependencyInjection
         services.AddScoped<IAccountReadRepository, AccountReadRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderBookReadRepository, OrderBookReadRepository>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
         services.AddScoped<IPositionReadRepository, PositionReadRepository>();
         services.AddScoped<ITradeReadRepository, TradeReadRepository>();
+        services.AddScoped<ISymbolReadRepository, SymbolReadRepository>();
         services.AddScoped<IExecutionResultHandler, PersistenceExecutionResultHandler>();
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();

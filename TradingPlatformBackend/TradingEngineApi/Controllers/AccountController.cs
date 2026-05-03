@@ -35,6 +35,14 @@ public class AccountsController : ApiController
     }
 
     [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        var result = await _mediator.Send(new LogoutCommand(), ct);
+        return result.ToActionResult();
+    }
+
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
@@ -57,12 +65,22 @@ public class AccountsController : ApiController
     [HttpGet("trades")]
     public async Task<IActionResult> GetMyTradeHistory([FromQuery] string? symbol, CancellationToken ct)
     {
-        var query = new GetTradeHistoryQuery 
+        var query = new GetTradeHistoryQuery
         {
             UserId = _userResolverService.GetUserId(),
             Symbol = symbol
         };
         var result = await _mediator.Send(query, ct);
+        return result.ToActionResult();
+    }
+
+    [Authorize]
+    [HttpPut]
+    public async Task<IActionResult> UpdateAccount([FromBody] UpdateAccountCommand command, CancellationToken ct)
+    {
+        command.UserId = _userResolverService.GetUserId();
+
+        var result = await _mediator.Send(command, ct);
         return result.ToActionResult();
     }
 }

@@ -10,6 +10,8 @@ using TradingEngine.Application.Features.Orders.Dtos;
 using TradingEngine.Domain.ValueObjects;
 using TradingEngine.Application.Interfaces;
 
+using TradingEngine.Application.Interfaces.Positions;
+
 namespace TradingEngine.Application.Features.Orders.Commands;
 
 /// <summary>
@@ -28,17 +30,20 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
     private readonly IMatchingEngineQueue _queue;
     private readonly IOrderRepository _orderRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IPositionRepository _positionRepository;
     private readonly IUserResolverService _userResolver;
 
     public PlaceOrderCommandHandler(
         IMatchingEngineQueue queue,
         IOrderRepository orderRepository,
         IAccountRepository accountRepository,
+        IPositionRepository positionRepository,
         IUserResolverService userResolver)
     {
         _queue = queue;
         _orderRepository = orderRepository;
         _accountRepository = accountRepository;
+        _positionRepository = positionRepository;
         _userResolver = userResolver;
     }
 
@@ -66,6 +71,17 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
                 var money = new Money(notional, account.Balance.Currency);
                 account.ReserveFunds(money);
                 await _accountRepository.UpdateAsync(account, cancellationToken);
+            }
+            else if (request.Side == OrderSide.Sell)
+            {
+                var position = await _positionRepository.GetUserPositionForSymbolAsync(userId, request.Symbol, cancellationToken);
+                if (position == null || position.AvailableQuantity.Value < request.Quantity)
+                {
+                    return Result<PlaceOrderResponseDto>.Failure("Insufficient position");
+                }
+                
+                position.Reserve(quantity);
+                await _positionRepository.UpdateAsync(position, cancellationToken);
             }
 
             var order = OrderDomain.Create(
