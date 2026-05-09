@@ -45,7 +45,7 @@ export const useRegister = () => {
 export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: async (data: UpdateProfileRequest) => {
-      const response = await api.put<ApiResponse<null>>('/accounts/me', data)
+      const response = await api.put<ApiResponse<null>>('/accounts', data)
       return response.data
     },
   })
@@ -54,7 +54,7 @@ export const useUpdateProfile = () => {
 export const useUpdatePassword = () => {
   return useMutation({
     mutationFn: async (data: Omit<UpdatePasswordRequest, 'confirmPassword'>) => {
-      const response = await api.put<ApiResponse<null>>('/accounts/me/password', data)
+      const response = await api.put<ApiResponse<null>>('/accounts', data)
       return response.data
     },
   })

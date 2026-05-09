@@ -26,6 +26,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { cn, formatCurrency } from '@/lib/utils'
+import { handleApiError } from '@/lib/error-handler'
 
 export const ProfilePage = () => {
   const userId = useAuthStore((state) => state.userId)
@@ -57,10 +58,9 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     if (account) {
-      const names = account.name.split(' ')
       profileForm.reset({
-        firstName: names[0] || '',
-        lastName: names.slice(1).join(' ') || '',
+        firstName: account.firstName,
+        lastName: account.lastName,
         email: account.email,
       })
     }
@@ -69,7 +69,7 @@ export const ProfilePage = () => {
   const onProfileSubmit = (data: UpdateProfileRequest) => {
     updateProfile(data, {
       onSuccess: () => toast.success('Profile updated successfully'),
-      onError: (err: any) => toast.error(err.message || 'Failed to update profile'),
+      onError: (err) => handleApiError(err),
     })
   }
 
@@ -81,7 +81,7 @@ export const ProfilePage = () => {
           toast.success('Password updated successfully')
           passwordForm.reset()
         },
-        onError: (err: any) => toast.error(err.message || 'Failed to update password'),
+        onError: (err) => handleApiError(err),
       }
     )
   }
@@ -94,6 +94,7 @@ export const ProfilePage = () => {
   const getInitials = (name: string) => {
     return name
       .split(' ')
+      .filter(Boolean)
       .map((n) => n[0])
       .join('')
       .toUpperCase()
@@ -112,9 +113,9 @@ export const ProfilePage = () => {
 
           <div className="mb-10">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-xl font-medium text-muted-foreground mb-4">
-              {account ? getInitials(account.name) : '??'}
+              {account ? getInitials(`${account.firstName} ${account.lastName}`) : '??'}
             </div>
-            <h2 className="text-lg font-bold text-foreground leading-tight mb-1">{account?.name || 'User'}</h2>
+            <h2 className="text-lg font-bold text-foreground leading-tight mb-1">{account?.firstName} {account?.lastName}</h2>
             <p className="text-sm text-muted-foreground mb-3">{account?.email}</p>
             <div className="inline-block px-2 py-0.5 border border-green-500/20 rounded text-[10px] font-bold text-green-500 uppercase tracking-wider bg-green-500/10">
               Active
@@ -199,7 +200,7 @@ export const ProfilePage = () => {
               </div>
               <h2 className="text-2xl font-bold text-foreground mb-6">Account details</h2>
               <div className="bg-card rounded-xl border border-border overflow-hidden">
-                <div className="flex items-center justify-between p-6 border-b border-border"><span className="text-sm font-medium text-muted-foreground">Full name</span><span className="text-sm font-bold text-foreground">{account?.name}</span></div>
+                <div className="flex items-center justify-between p-6 border-b border-border"><span className="text-sm font-medium text-muted-foreground">Full name</span><span className="text-sm font-bold text-foreground">{account?.firstName} {account?.lastName}</span></div>
                 <div className="flex items-center justify-between p-6 border-b border-border"><span className="text-sm font-medium text-muted-foreground">Email</span><span className="text-sm font-bold text-foreground">{account?.email}</span></div>
                 <div className="flex items-center justify-between p-6 border-b border-border"><span className="text-sm font-medium text-muted-foreground">Member since</span><span className="text-sm font-bold text-foreground">{account ? new Date(account.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span></div>
                 <div className="flex items-center justify-between p-6"><span className="text-sm font-medium text-muted-foreground">Last login</span><span className="text-sm font-bold text-foreground">{account?.lastLoginAt ? new Date(account.lastLoginAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span></div>

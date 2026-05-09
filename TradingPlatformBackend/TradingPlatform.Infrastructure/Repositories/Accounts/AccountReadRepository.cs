@@ -29,7 +29,9 @@ namespace TradingEngine.Infrastructure.Repositories.Accounts
             {
                 Id = account.Id,
                 Email = account.Email,
-                Name = account.FullName,
+                FullName = account.FullName,
+                FirstName = account.FirstName,
+                LastName = account.LastName,
                 Balance = account.Balance,
                 ReservedBalance = account.ReservedBalance,
                 AvailableBalance = account.AvailableBalance,

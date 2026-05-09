@@ -6,7 +6,7 @@ export const LoginResponseDtoSchema = z.object({
   refreshToken: z.string(),
   expiresAt: z.number(),
   userId: z.string().uuid(),
-  email: z.string().email().nullable(),
+  email: z.string().email(),
 })
 
 export type LoginResponseDto = z.infer<typeof LoginResponseDtoSchema>
@@ -22,6 +22,8 @@ export const AccountDtoSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   name: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
   balance: BalanceDtoSchema,
   reservedBalance: BalanceDtoSchema,
   availableBalance: BalanceDtoSchema,
