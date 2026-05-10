@@ -29,7 +29,7 @@ export const useRegister = () => {
     mutationFn: async (data: RegisterRequest) => {
       const response = await api.post<ApiResponse<LoginResponseDto>>('/accounts/register', {
         ...data,
-        currency: Currency[data.currency] // Send as string name for testing
+        currency: Currency[data.currency]
       })
       return response.data
     },

@@ -1,8 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using TradingEngine.Application.Common;
 using TradingEngine.Application.Interfaces.Accounts;
-using TradingEngine.Domain.Entities;
 using TradingEngine.Domain.Interfaces;
 
 namespace TradingEngine.Application.Features.Accounts.Commands;
@@ -42,16 +40,13 @@ public sealed class UpdateAccountCommandHandler : ICommandHandler<UpdateAccountC
             return Result.Failure("Account not found.");
         }
 
-        if (request.FirstName != null || request.LastName != null)
+        if (request.FirstName != null || request.LastName != null || request.Email != null)
         {
             var firstName = request.FirstName ?? account.FirstName;
             var lastName = request.LastName ?? account.LastName;
-            account.Update(firstName, lastName);
-        }
+            var email = request.Email ?? account.Email;
 
-        if (request.Email != null)
-        {
-            account.UpdateEmail(request.Email);
+            account.Update(firstName, lastName, email);
         }
 
         if (request.NewPassword != null)

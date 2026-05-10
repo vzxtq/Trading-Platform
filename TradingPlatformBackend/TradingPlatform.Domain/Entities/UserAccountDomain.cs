@@ -145,22 +145,18 @@ public class UserAccountDomain : AggregateRoot
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new ArgumentException("Email cannot be empty.", nameof(email));
-        
-        Email = email.Trim().ToLowerInvariant();
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void Update(string firstName, string lastName)
+    public void Update(string firstName, string lastName, string email)
     {
         if (string.IsNullOrWhiteSpace(firstName))
             throw new ArgumentException("First name cannot be empty", nameof(firstName));
 
         if (string.IsNullOrWhiteSpace(lastName))
             throw new ArgumentException("Last name cannot be empty", nameof(lastName));
+
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("Email cannot be empty.", nameof(email));
+
+        Email = email.Trim().ToLowerInvariant();
 
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
