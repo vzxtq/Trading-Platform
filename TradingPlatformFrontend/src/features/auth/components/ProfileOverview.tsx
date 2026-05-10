@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 import { useAccount } from '../api/auth.api'
-import { formatCurrency } from '@/lib/utils'
+import { formatAmount } from '@/lib/utils'
 
 export const ProfileOverview = () => {
   const userId = useAuthStore((state) => state.userId)
@@ -14,7 +14,7 @@ export const ProfileOverview = () => {
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Balance</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-foreground">
-              {account ? formatCurrency(account.balance.amount, account.balance.currency).split(' ')[0] : '0.00'}
+              {account ? formatAmount(account.balance.amount) : '0.00'}
             </span>
             <span className="text-sm font-bold text-muted-foreground">{account?.balance.currency}</span>
           </div>
@@ -23,7 +23,7 @@ export const ProfileOverview = () => {
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Reserved</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-amber-500">
-              {account ? formatCurrency(account.reservedBalance.amount, account.reservedBalance.currency).split(' ')[0] : '0.00'}
+              {account ? formatAmount(account.reservedBalance.amount) : '0.00'}
             </span>
             <span className="text-sm font-bold text-muted-foreground">{account?.reservedBalance.currency}</span>
           </div>
@@ -32,7 +32,7 @@ export const ProfileOverview = () => {
           <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Available</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-green-500">
-              {account ? formatCurrency(account.availableBalance.amount, account.availableBalance.currency).split(' ')[0] : '0.00'}
+              {account ? formatAmount(account.availableBalance.amount) : '0.00'}
             </span>
             <span className="text-sm font-bold text-muted-foreground">{account?.availableBalance.currency}</span>
           </div>

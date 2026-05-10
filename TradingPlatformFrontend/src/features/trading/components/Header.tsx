@@ -74,7 +74,7 @@ export const TradingHeader: React.FC<TradingHeaderProps> = ({ userId, symbol, se
           {account && account.reservedBalance.amount > 0 && (
             <div className="flex flex-col items-end px-3">
               <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-none mb-1">Reserved</span>
-              <span className="text-[13px] text-[#f59e0b] font-bold leading-none">
+              <span className="text-[13px] text-amber-500 font-bold leading-none">
                 {formatCurrency(account.reservedBalance.amount, account.reservedBalance.currency)}
               </span>
             </div>

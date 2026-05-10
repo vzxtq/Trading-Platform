@@ -5,7 +5,6 @@ import { toast } from 'sonner'
 import { UpdateProfileSchema, type UpdateProfileRequest } from '../types/auth-requests.types'
 import { useAccount, useUpdateProfile } from '../api/auth.api'
 import { useAuthStore } from '@/store/auth'
-import { handleApiError } from '@/lib/error-handler'
 
 export const useProfileForm = () => {
   const userId = useAuthStore((state) => state.userId)
@@ -34,7 +33,6 @@ export const useProfileForm = () => {
   const onSubmit = (data: UpdateProfileRequest) => {
     updateProfile(data, {
       onSuccess: () => toast.success('Profile updated successfully'),
-      onError: (err) => handleApiError(err),
     })
   }
 

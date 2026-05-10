@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { UpdatePasswordSchema, type UpdatePasswordRequest } from '../types/auth-requests.types'
 import { useUpdatePassword } from '../api/auth.api'
-import { handleApiError } from '@/lib/error-handler'
 
 export const usePasswordForm = () => {
   const { mutate: updatePassword } = useUpdatePassword()
@@ -25,7 +24,6 @@ export const usePasswordForm = () => {
           toast.success('Password updated successfully')
           form.reset()
         },
-        onError: (err) => handleApiError(err),
       }
     )
   }
