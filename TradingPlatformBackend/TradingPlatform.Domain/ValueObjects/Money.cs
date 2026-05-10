@@ -35,6 +35,7 @@ public sealed class Money : IEquatable<Money>
                 $"Currency mismatch: {a.Currency} vs {b.Currency}");
     }
 
+    #region overload operators for addition, subtraction, comparison
     public static Money operator +(Money a, Money b)
     {
         EnsureSameCurrency(a, b);
@@ -70,6 +71,7 @@ public sealed class Money : IEquatable<Money>
         EnsureSameCurrency(a, b);
         return a.Amount <= b.Amount;
     }
+    #endregion
 
     public bool Equals(Money? other)
     {

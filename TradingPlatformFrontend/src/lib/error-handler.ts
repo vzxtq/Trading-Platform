@@ -6,7 +6,7 @@ export const handleApiError = (error: unknown) => {
     const data = error.response?.data as any
     const status = error.response?.status
 
-    // 1. Try to extract message from our standard ApiResponse structure
+    // Extract message from our standard ApiResponse structure
     if (data?.message || (data?.errors && data.errors.length > 0)) {
       const message = data.message || "Action failed"
       const details = Array.isArray(data.errors) 
@@ -19,7 +19,7 @@ export const handleApiError = (error: unknown) => {
       return
     }
 
-    // 2. Try to handle standard Problem Details (RFC 7807) used by .NET
+    // Handle standard Problem Details (RFC 7807) used by .NET
     if (data?.title || data?.detail) {
       toast.error(data.title || "Error", {
         description: data.detail || (data.errors ? JSON.stringify(data.errors) : undefined)
@@ -27,7 +27,6 @@ export const handleApiError = (error: unknown) => {
       return
     }
 
-    // 3. Fallback to status-based user-friendly messages instead of "Request failed with..."
     switch (status) {
       case 400:
         toast.error("Invalid Request", { description: "The server could not understand the request." })

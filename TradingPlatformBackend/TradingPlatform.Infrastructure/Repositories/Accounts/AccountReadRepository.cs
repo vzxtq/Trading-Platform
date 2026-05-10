@@ -32,9 +32,21 @@ namespace TradingEngine.Infrastructure.Repositories.Accounts
                 FullName = account.FullName,
                 FirstName = account.FirstName,
                 LastName = account.LastName,
-                Balance = account.Balance,
-                ReservedBalance = account.ReservedBalance,
-                AvailableBalance = account.AvailableBalance,
+                Balance = new MoneyDto
+                {
+                    Amount = account.Balance.Amount,
+                    Currency = account.Balance.Currency,
+                },
+                ReservedBalance = new MoneyDto
+                {
+                    Amount = account.ReservedBalance.Amount,
+                    Currency = account.ReservedBalance.Currency,
+                },
+                AvailableBalance = new MoneyDto
+                {
+                    Amount = account.AvailableBalance.Amount,
+                    Currency = account.AvailableBalance.Currency,
+                },
                 LastLoginAt = account.LastLoginAt,
                 IsActive = account.IsActive,
                 CreatedAt = account.CreatedAt
