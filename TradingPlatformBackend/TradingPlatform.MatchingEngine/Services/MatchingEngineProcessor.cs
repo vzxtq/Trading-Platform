@@ -9,7 +9,7 @@ public sealed class MatchingEngineProcessor : IAsyncDisposable
 {
     private readonly ConcurrentDictionary<string, SymbolEngineProcessor> _engines = new();
 
-    private static long _sequenceId;
+    private long _sequenceId;
 
     public async ValueTask<ExecutionResult> ProcessAsync(MatchingEngineCommand command, long engineTimestamp)
     {

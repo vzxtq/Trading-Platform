@@ -7,14 +7,14 @@ using TradingEngine.Application.Interfaces.Orders;
 
 namespace TradingEngine.Application.Features.Orders.Queries;
 
-public record GetOrdersByUserIdQuery : PaginatedQuery, IQuery<Result<PagedResult<OrderListDto>>>
+public record GetOrdersByUserIdQuery : PaginatedQuery, IQuery<Result<OrderListResponseDto>>
 {
     [JsonIgnore]
     public Guid UserId { get; set; }
     public OrderFilterDto Filter { get; set; } = new();
 }
 
-public class GetOrdersQueryHandler : IRequestHandler<GetOrdersByUserIdQuery, Result<PagedResult<OrderListDto>>>
+public class GetOrdersQueryHandler : IRequestHandler<GetOrdersByUserIdQuery, Result<OrderListResponseDto>>
 {
     private readonly IOrderReadRepository _orderReadRepository;
 
@@ -23,14 +23,24 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrdersByUserIdQuery, Res
         _orderReadRepository = orderReadRepository;
     }
 
-    public async Task<Result<PagedResult<OrderListDto>>> Handle(GetOrdersByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<OrderListResponseDto>> Handle(GetOrdersByUserIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await _orderReadRepository.GetOrdersAsync(
+        var orders = await _orderReadRepository.GetOrdersAsync(
             request.UserId,
             request.Filter,
             request,
             cancellationToken);
 
-        return Result<PagedResult<OrderListDto>>.Success(result);
+        var summary = await _orderReadRepository.GetOrderSummaryAsync(request.UserId, cancellationToken);
+
+        var summaryDto = new OrderSummaryDto(
+            summary.TotalOrders,
+            summary.OpenOrders,
+            summary.FilledOrders,
+            summary.CancelledOrders,
+            summary.TotalVolume,
+            summary.FillRate);
+
+        return Result<OrderListResponseDto>.Success(new OrderListResponseDto(orders, summaryDto, request.GetSortingOptions()));
     }
 }

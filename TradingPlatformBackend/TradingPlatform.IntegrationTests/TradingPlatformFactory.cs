@@ -63,6 +63,25 @@ public class TradingPlatformFactory : WebApplicationFactory<Program>
             // For real DB, we use Migrate to ensure schema is up to date
             await context.Database.MigrateAsync();
         }
+
+        // Seed common symbols used in tests
+        var symbols = new[]
+        {
+            TradingEngine.Domain.Entities.SymbolDomain.Create("AAPL", TradingEngine.Domain.Enums.Currency.USD),
+            TradingEngine.Domain.Entities.SymbolDomain.Create("BTCUSD", TradingEngine.Domain.Enums.Currency.USD),
+            TradingEngine.Domain.Entities.SymbolDomain.Create("MSFT", TradingEngine.Domain.Enums.Currency.USD),
+            TradingEngine.Domain.Entities.SymbolDomain.Create("GOOGL", TradingEngine.Domain.Enums.Currency.USD)
+        };
+
+        foreach (var symbol in symbols)
+        {
+            if (!await context.Symbols.AnyAsync(s => s.Name == symbol.Name))
+            {
+                context.Symbols.Add(symbol);
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 
     protected override void Dispose(bool disposing)

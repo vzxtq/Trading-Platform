@@ -48,6 +48,7 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                 .ToList();
 
             var orders = await _dbContext.Orders
+                .Include(o => o.Symbol)
                 .Where(o => orderIds.Contains(o.Id))
                 .ToDictionaryAsync(o => o.Id, cancellationToken);
 
@@ -62,8 +63,10 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
 
             var symbols = orders.Values.Select(o => o.Symbol.Name).Distinct().ToList();
             var positions = await _dbContext.Positions
-                .Where(p => userIds.Contains(p.UserId) && symbols.Contains(p.SymbolValue.Value))
+                .Where(p => userIds.Contains(p.UserId))
                 .ToListAsync(cancellationToken);
+
+            positions = positions.Where(p => symbols.Contains(p.SymbolValue.Value)).ToList();
 
             PositionDomain? FindPosition(Guid userId, Symbol symbol) =>
                 positions.FirstOrDefault(p => p.UserId == userId && p.SymbolValue == symbol);

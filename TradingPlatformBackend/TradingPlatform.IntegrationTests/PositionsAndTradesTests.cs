@@ -93,7 +93,12 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
         // 6. Verify Trades for Buyer
         var buyerTradesResp = await _client.GetAsync("/api/accounts/trades");
         buyerTradesResp.EnsureSuccessStatusCode();
-        var buyerTrades = await buyerTradesResp.Content.ReadFromJsonAsync<ApiResponse<List<TradeDto>>>();
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+        };
+        var buyerTrades = await buyerTradesResp.Content.ReadFromJsonAsync<ApiResponse<List<TradeDto>>>(options);
         
         buyerTrades!.Data.Should().NotBeNull();
         buyerTrades.Data.Should().ContainSingle(t => t.Symbol == symbol);
@@ -104,7 +109,7 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sellerToken);
         var sellerPositionsResp = await _client.GetAsync("/api/accounts/positions");
         sellerPositionsResp.EnsureSuccessStatusCode();
-        var sellerPositions = await sellerPositionsResp.Content.ReadFromJsonAsync<ApiResponse<List<PositionDto>>>();
+        var sellerPositions = await sellerPositionsResp.Content.ReadFromJsonAsync<ApiResponse<List<PositionDto>>>(options);
         
         // Seller had 10, sold 10, so position should be 0 or removed depending on implementation
         var sellerSymbolPosition = sellerPositions!.Data?.FirstOrDefault(p => p.Symbol == symbol);
@@ -116,7 +121,7 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
         // 8. Verify Trades for Seller
         var sellerTradesResp = await _client.GetAsync("/api/accounts/trades");
         sellerTradesResp.EnsureSuccessStatusCode();
-        var sellerTrades = await sellerTradesResp.Content.ReadFromJsonAsync<ApiResponse<List<TradeDto>>>();
+        var sellerTrades = await sellerTradesResp.Content.ReadFromJsonAsync<ApiResponse<List<TradeDto>>>(options);
         
         sellerTrades!.Data.Should().NotBeNull();
         sellerTrades.Data.Should().ContainSingle(t => t.Symbol == symbol);

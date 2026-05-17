@@ -7,5 +7,6 @@ namespace TradingEngine.Application.Features.Orders.Dtos
         public OrderSide? Side { get; set; }
         public OrderStatus? Status { get; set; }
         public string? Symbol { get; set; }
+        public string? Search { get; set; }
     }
 }

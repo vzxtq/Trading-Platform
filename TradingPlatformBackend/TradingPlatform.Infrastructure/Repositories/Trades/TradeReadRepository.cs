@@ -3,6 +3,7 @@ using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Trades.Dtos;
 using TradingEngine.Application.Interfaces.Trades;
 using TradingEngine.Domain.Enums;
+using TradingEngine.Domain.ValueObjects;
 using TradingEngine.Infrastructure.Persistence;
 
 namespace TradingEngine.Infrastructure.Repositories.Trades;
@@ -24,7 +25,8 @@ public sealed class TradeReadRepository : ITradeReadRepository
 
         if (!string.IsNullOrWhiteSpace(symbol))
         {
-            query = query.Where(t => t.Symbol.Value == symbol);
+            var symbolObj = new Symbol(symbol);
+            query = query.Where(t => t.Symbol == symbolObj);
         }
 
         var trades = await query

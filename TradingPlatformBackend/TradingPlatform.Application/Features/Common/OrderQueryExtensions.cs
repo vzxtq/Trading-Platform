@@ -1,3 +1,4 @@
+using TradingEngine.Application.Common.Models;
 using TradingEngine.Domain.Entities;
 using TradingEngine.Domain.Enums;
 
@@ -29,8 +30,28 @@ public static class OrderQueryExtensions
         return status.HasValue ? query.Where(o => o.Status == status.Value) : query;
     }
 
-    public static IQueryable<OrderDomain> OrderByNewest(this IQueryable<OrderDomain> query)
+    public static IQueryable<OrderDomain> FilterBySearch(this IQueryable<OrderDomain> query, string? search)
     {
-        return query.OrderByDescending(o => o.CreatedAt);
+        if (string.IsNullOrWhiteSpace(search))
+            return query;
+
+        var searchTerm = search.Trim().ToUpper();
+        return query.Where(o => o.Symbol.Name.Contains(searchTerm));
+    }
+
+    public static IQueryable<OrderDomain> SortBy(this IQueryable<OrderDomain> query, SortingOptions? options)
+    {
+        if (options == null)
+            return query.OrderByDescending(o => o.CreatedAt);
+
+        var isDescending = options.Direction != SortingDirection.Ascending;
+
+        return options.Column.ToLower() switch
+        {
+            "symbol" => isDescending ? query.OrderByDescending(o => o.Symbol.Name) : query.OrderBy(o => o.Symbol.Name),
+            "price" => isDescending ? query.OrderByDescending(o => o.Price) : query.OrderBy(o => o.Price),
+            "createdat" => isDescending ? query.OrderByDescending(o => o.CreatedAt) : query.OrderBy(o => o.CreatedAt),
+            _ => query.OrderByDescending(o => o.CreatedAt)
+        };
     }
 }
