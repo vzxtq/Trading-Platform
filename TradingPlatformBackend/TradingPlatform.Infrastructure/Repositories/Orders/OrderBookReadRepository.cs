@@ -4,6 +4,7 @@ using TradingEngine.Application.Features.Orders.Repositories;
 using TradingEngine.Infrastructure.Persistence;
 using TradingEngine.Domain.ValueObjects;
 using TradingEngine.Application.Common;
+using TradingEngine.Domain.Enums;
 
 namespace TradingEngine.Infrastructure.Repositories.Orders;
 
@@ -19,14 +20,16 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
     public async Task<OrderBookDto> GetOrderBookAsync(Symbol symbol, CancellationToken cancellationToken)
     {
         var buyOrders = await _dbContext.Orders
-            .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Buy)
-            .OrderByDescending(o => EF.Property<decimal>(o, "Price"))
+                .Include(o => o.Symbol)
+                .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Buy)
+            .OrderByDescending(o => o.Price.Value)
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
         var sellOrders = await _dbContext.Orders
-            .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Sell)
-            .OrderBy(o => EF.Property<decimal>(o, "Price"))
+                .Include(o => o.Symbol)
+                .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Sell)
+            .OrderBy(o => o.Price.Value)
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 

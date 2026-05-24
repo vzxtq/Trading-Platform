@@ -60,13 +60,19 @@ public sealed class CancelOrderCommandHandler : ICommandHandler<CancelOrderComma
             return Result<CancelOrderResponseDto>.Failure("Order does not belong to user");
         }
 
-        // Release reserved funds for Buy orders or reserved quantity for Sell orders
+        // Release reserved funds for Buy orders or reserved quantity for Sell orders.
+        // Use the stored ReservedAmount which captures the actual reserved value at placement.
         if (order.Side == OrderSide.Buy)
         {
             var account = await _accountRepository.GetByIdAsync(order.UserId, cancellationToken);
             if (account != null)
             {
-                var releaseAmount = new Money(order.Price.Value * order.RemainingQuantity.Value, account.Balance.Currency);
+                // Scale release proportionally for partially filled orders
+                var remainingRatio = order.Quantity.Value > 0
+                    ? order.RemainingQuantity.Value / order.Quantity.Value
+                    : 0;
+                var releaseValue = order.ReservedAmount * remainingRatio;
+                var releaseAmount = new Money(releaseValue, account.Balance.Currency);
                 account.ReleaseReservedFunds(releaseAmount);
                 await _accountRepository.UpdateAsync(account, cancellationToken);
             }

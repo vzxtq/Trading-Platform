@@ -19,7 +19,14 @@ namespace TradingEngine.Domain.Entities
         public decimal FilledQuantity => Quantity.Value - RemainingQuantity.Value;
 
         public OrderSide Side { get; private set; }
+        public OrderType Type { get; private set; }
         public OrderStatus Status { get; private set; }
+
+        /// <summary>
+        /// The actual amount reserved at placement time (funds for Buy, quantity for Sell).
+        /// Used for correct release on cancellation.
+        /// </summary>
+        public decimal ReservedAmount { get; private set; }
 
         private OrderDomain() { }
 
@@ -28,7 +35,9 @@ namespace TradingEngine.Domain.Entities
             Guid symbolId,
             Price price,
             Quantity quantity,
-            OrderSide side)
+            OrderSide side,
+            OrderType type,
+            decimal reservedAmount)
         {
             var order = new OrderDomain
             {
@@ -39,7 +48,9 @@ namespace TradingEngine.Domain.Entities
                 Quantity = quantity,
                 RemainingQuantity = quantity,
                 Side = side,
+                Type = type,
                 Status = OrderStatus.Open,
+                ReservedAmount = reservedAmount,
                 CreatedAt = DateTime.UtcNow
             };
 

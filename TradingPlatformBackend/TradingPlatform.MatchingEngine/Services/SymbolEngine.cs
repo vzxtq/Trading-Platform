@@ -42,6 +42,8 @@ public sealed class SymbolEngine
             command.Price,
             command.Quantity,
             command.Side,
+            command.Type,
+            command.MaxTotalCost,
             command.ReceivedAt);
 
         var trades = new List<ExecutedTrade>();
@@ -51,9 +53,11 @@ public sealed class SymbolEngine
 
         var takerStatus = taker.IsFullyMatched
             ? OrderStatus.Filled
-            : trades.Count > 0
-                ? OrderStatus.PartiallyFilled
-                : OrderStatus.Open;
+            : taker.Type == OrderType.Market
+                ? OrderStatus.Cancelled // Market orders that aren't fully matched are cancelled
+                : trades.Count > 0
+                    ? OrderStatus.PartiallyFilled
+                    : OrderStatus.Open;
 
         stateChanges.Add(new OrderStateChange(
             OrderId: taker.Id,
@@ -62,7 +66,7 @@ public sealed class SymbolEngine
             RemainingQuantity: taker.RemainingQuantity,
             Status: takerStatus));
 
-        if (!taker.IsFullyMatched)
+        if (!taker.IsFullyMatched && taker.Type == OrderType.Limit)
             _orderBook.AddOrder(taker);
 
         return new ExecutionResult.Accepted
@@ -115,6 +119,7 @@ public sealed class SymbolEngine
         List<ExecutedTrade> trades,
         List<OrderStateChange> stateChanges)
     {
+        long takerCostSoFar = 0;
         var makers = taker.Side == OrderSide.Buy
             ? _orderBook.GetAskOrders()
             : _orderBook.GetBidOrders();
@@ -129,8 +134,20 @@ public sealed class SymbolEngine
 
             var quantity = Math.Min(taker.RemainingQuantity, maker.RemainingQuantity);
 
+            if (taker.Side == OrderSide.Buy && taker.MaxTotalCost > 0)
+            {
+                var maxAffordableQuantity = (taker.MaxTotalCost - takerCostSoFar) / maker.Price;
+                if (maxAffordableQuantity <= 0)
+                    break; // Exhausted reserved funds
+
+                quantity = Math.Min(quantity, maxAffordableQuantity);
+            }
+
             taker.Fill(quantity);
             maker.Fill(quantity);
+
+            if (taker.Side == OrderSide.Buy)
+                takerCostSoFar += quantity * maker.Price;
 
             trades.Add(new ExecutedTrade(
                 TradeId: Guid.NewGuid(),
@@ -159,6 +176,9 @@ public sealed class SymbolEngine
 
     private static bool IsPriceCompatible(EngineOrder taker, EngineOrder maker)
     {
+        if (taker.Type == OrderType.Market)
+            return true;
+
         return taker.Side == OrderSide.Buy
             ? taker.Price >= maker.Price
             : taker.Price <= maker.Price;

@@ -19,7 +19,13 @@ public class UserAccountDomain : AggregateRoot
     public bool IsActive { get; private set; } = false;
 
     private UserAccountDomain()
-    { }
+    {
+        Email = null!;
+        FirstName = null!;
+        LastName = null!;
+        Balance = null!;
+        ReservedBalance = null!;
+    }
 
     public UserAccountDomain(
         Guid id,

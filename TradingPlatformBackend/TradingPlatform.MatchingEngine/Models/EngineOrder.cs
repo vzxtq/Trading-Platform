@@ -17,6 +17,8 @@ public class EngineOrder
     public long FilledQuantity { get; private set; }
     public long RemainingQuantity { get; private set; }
     public OrderSide Side { get; }
+    public OrderType Type { get; }
+    public long MaxTotalCost { get; }
     public long CreatedAt { get; }
 
     public bool IsFullyMatched => RemainingQuantity == 0;
@@ -29,9 +31,11 @@ public class EngineOrder
         long price,
         long quantity,
         OrderSide side,
+        OrderType type,
+        long maxTotalCost,
         long createdAt)
     {
-        if (price <= 0) throw new ArgumentOutOfRangeException(nameof(price));
+        if (type == OrderType.Limit && price <= 0) throw new ArgumentOutOfRangeException(nameof(price));
         if (quantity <= 0) throw new ArgumentOutOfRangeException(nameof(quantity));
 
         Id = id;
@@ -43,6 +47,8 @@ public class EngineOrder
         FilledQuantity = 0;
         RemainingQuantity = quantity;
         Side = side;
+        Type = type;
+        MaxTotalCost = maxTotalCost;
         CreatedAt = createdAt;
     }
 

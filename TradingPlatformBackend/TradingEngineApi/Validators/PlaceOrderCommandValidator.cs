@@ -12,8 +12,13 @@ public class PlaceOrderCommandValidator : AbstractValidator<PlaceOrderCommand>
             .NotEmpty()
             .Matches("^[A-Z]{2,20}$");
 
+        RuleFor(x => x.Type)
+            .IsInEnum();
+
         RuleFor(x => x.Price)
-            .GreaterThan(0);
+            .GreaterThan(0)
+            .When(x => x.Type == OrderType.Limit)
+            .WithMessage("Price must be greater than 0 for Limit orders.");
 
         RuleFor(x => x.Quantity)
             .GreaterThan(0);

@@ -26,6 +26,10 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
             .IsRequired()
             .HasConversion<string>();
 
+        builder.Property(o => o.Type)
+            .IsRequired()
+            .HasConversion<string>();
+
         builder.Property(o => o.Status)
             .IsRequired()
             .HasConversion<string>();
@@ -42,17 +46,17 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
             v => v.Value,
             v => new Price(v));
         var priceComparer = new ValueComparer<Price>(
-            (l, r) => l.Value == r.Value,
-            p => p.Value.GetHashCode(),
-            p => new Price(p.Value));
+            (l, r) => l!.Value == r!.Value,
+            p => p!.Value.GetHashCode(),
+            p => new Price(p!.Value));
 
         var quantityConverter = new ValueConverter<Quantity, decimal>(
             v => v.Value,
             v => new Quantity(v));
         var quantityComparer = new ValueComparer<Quantity>(
-            (l, r) => l.Value == r.Value,
-            q => q.Value.GetHashCode(),
-            q => new Quantity(q.Value));
+            (l, r) => l!.Value == r!.Value,
+            q => q!.Value.GetHashCode(),
+            q => new Quantity(q!.Value));
 
         builder.Property(o => o.Price)
                .HasConversion(priceConverter)
@@ -77,6 +81,12 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
                .HasColumnName("RemainingQuantity")
                .HasPrecision(18, 8)
                .IsRequired();
+
+        builder.Property(o => o.ReservedAmount)
+               .HasColumnName("ReservedAmount")
+               .HasPrecision(18, 8)
+               .IsRequired()
+               .HasDefaultValue(0m);
 
         builder.Property(o => o.CreatedAt).IsRequired();
         builder.Property(o => o.UpdatedAt);

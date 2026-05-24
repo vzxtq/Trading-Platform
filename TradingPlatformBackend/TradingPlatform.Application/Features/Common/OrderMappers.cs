@@ -14,7 +14,7 @@ public static class OrderMappers
         SymbolName = order.Symbol.Name,
         Currency = order.Symbol.Currency,
         Side = order.Side,
-        Type = "Limit", // TODO: Should be implemented enum
+        Type = order.Type,
         Price = new MoneyDto
         {
             Amount = order.Price.Value,

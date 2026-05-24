@@ -9,7 +9,7 @@ public class OrderListDto
     public string SymbolName { get; set; } = string.Empty;
     public Currency Currency { get; set; }
     public OrderSide Side { get; set; }
-    public string Type { get; set; } = string.Empty;
+    public OrderType Type { get; set; }
     public MoneyDto Price { get; set; } = new();
     public decimal Quantity { get; set; }
     public decimal FilledQuantity { get; set; }

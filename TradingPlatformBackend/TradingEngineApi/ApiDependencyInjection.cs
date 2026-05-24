@@ -20,7 +20,8 @@ namespace TradingEngine.Api
             IConfiguration configuration,
             IWebHostEnvironment environment)
         {
-            var jwtOptions = configuration.GetSection(JwtSettings.Section).Get<JwtSettings>();
+            var jwtOptions = configuration.GetSection(JwtSettings.Section).Get<JwtSettings>()
+                ?? throw new InvalidOperationException("JWT settings are missing in configuration.");
 
             services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.Section));
 

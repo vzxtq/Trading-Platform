@@ -21,6 +21,8 @@ public sealed record AddOrderCommand : MatchingEngineCommand
     public required long Price { get; init; }
     public required long Quantity { get; init; }
     public required OrderSide Side { get; init; }
+    public required OrderType Type { get; init; }
+    public required long MaxTotalCost { get; init; }
     public required long ReceivedAt { get; init; }
 }
 
