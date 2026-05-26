@@ -30,7 +30,7 @@ public sealed class TradeConfiguration : IEntityTypeConfiguration<TradeDomain>
             .HasForeignKey(t => t.SymbolId);
 
         builder.Property(t => t.Price)
-               .HasConversion(v => v.Value, v => new Price(v))
+               .HasConversion(v => v.Value, v => v == 0 ? Price.Market() : new Price(v))
                .HasColumnName("Price")
                .HasPrecision(18, 8)
                .IsRequired();

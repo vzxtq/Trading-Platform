@@ -1,19 +1,25 @@
 import React from 'react'
 import { useUserOrders, useCancelOrder } from '../api/trading.api'
 import { OrderSide } from '@/types/enums/order-side.enum'
-import { OrderStatus } from '@/types/enums/order-status.enum'
+import { OrderStatus } from '@/types/enums' // Corrected import path for OrderStatus
 
 interface OpenOrdersProps {
-  userId: string | null
 }
 
-export const OpenOrders: React.FC<OpenOrdersProps> = ({ userId }) => {
-  const { data: orders = [] } = useUserOrders(userId)
+export const OpenOrders: React.FC<OpenOrdersProps> = () => {
+  const { data: responseData } = useUserOrders({
+    page: 1, // Default page
+    pageSize: 10, // Default page size
+    'Filter.Status': OrderStatus.Open, // Filter for open orders
+    // Assuming we also want to show partially filled orders as "open"
+    // For now, only filtering by OrderStatus.Open. If the backend supports multiple statuses in Filter.Status,
+    // we would pass an array or a different query param. For now, matching the previous frontend logic for simplicity.
+  })
+  const orders = responseData?.orders?.items || []
   const cancelOrder = useCancelOrder()
 
-  const openOrders = orders.filter(
-    o => o.status === OrderStatus.Open || o.status === OrderStatus.PartiallyFilled
-  )
+  // No need to filter locally anymore as the API handles it
+  const openOrders = orders
 
   return (
     <div className="flex-1 flex flex-col text-xs font-sans h-full">
@@ -37,17 +43,17 @@ export const OpenOrders: React.FC<OpenOrdersProps> = ({ userId }) => {
               <span className={`w-[10%] font-bold ${order.side === OrderSide.Buy ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
                 {order.side === OrderSide.Buy ? 'BUY' : 'SELL'}
               </span>
-              <span className="w-[15%] font-medium text-foreground">{order.symbol}</span>
+              <span className="w-[15%] font-medium text-foreground">{order.symbolName}</span>
               <span className="w-[20%] text-right font-mono text-foreground">{order.price.toFixed(2)}</span>
               <span className="w-[20%] text-right font-mono text-foreground">
-                {(order.quantity - order.remainingQuantity).toFixed(2)} / {order.quantity.toFixed(2)}
+                {(order.filledQuantity ?? 0).toFixed(2)}
               </span>
               <span className="w-[20%] text-right font-mono text-muted-foreground">{(order.price * order.quantity).toFixed(2)}</span>
               <div className="w-[15%] text-right">
                 <button
                   onClick={() => cancelOrder.mutate(order.id)}
                   disabled={cancelOrder.isPending}
-                  className="text-muted-foreground hover:text-destructive font-bold uppercase text-[10px] transition-colors disabled:opacity-50"
+                  className="text-destructive hover:text-destructive font-bold uppercase text-[10px] transition-colors disabled:opacity-50"
                 >
                   {cancelOrder.isPending ? '...' : 'Cancel'}
                 </button>

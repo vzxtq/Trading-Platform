@@ -67,7 +67,7 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
                 return Result<PlaceOrderResponseDto>.Failure("Symbol not found");
 
             var symbolValue = new Symbol(request.Symbol);
-            var price = request.Type == OrderType.Limit ? new Price(request.Price!.Value) : new Price(0);
+            var price = request.Type == OrderType.Limit ? new Price(request.Price!.Value) : Price.Market();
             var quantity = new Quantity(request.Quantity);
 
             var account = await _accountRepository.GetByIdAsync(userId, cancellationToken);

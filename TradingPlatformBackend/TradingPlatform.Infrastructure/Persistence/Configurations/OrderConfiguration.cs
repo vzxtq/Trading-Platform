@@ -44,11 +44,11 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
         // Converters and Comparers for Value Objects
         var priceConverter = new ValueConverter<Price, decimal>(
             v => v.Value,
-            v => new Price(v));
+            v => v == 0 ? Price.Market() : new Price(v));
         var priceComparer = new ValueComparer<Price>(
             (l, r) => l!.Value == r!.Value,
             p => p!.Value.GetHashCode(),
-            p => new Price(p!.Value));
+            p => p!.Value == 0 ? Price.Market() : new Price(p!.Value));
 
         var quantityConverter = new ValueConverter<Quantity, decimal>(
             v => v.Value,

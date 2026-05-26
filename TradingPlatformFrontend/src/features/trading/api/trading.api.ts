@@ -1,9 +1,21 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '@/api/axios'
-import type { ApiResponse, OrderBookResponse, OrderDto } from '@/types'
+import type { ApiResponse, OrderBookResponse, OrderDto, PagedResult, OrderListDto, OrderListResponseDto } from '@/types'
+import { OrderListResponseDtoSchema, OrderBookResponseSchema } from '@/types/order.types' // Import OrderBookResponseSchema
 import type { PlaceOrderRequest } from '../types/trading.types'
 import { useOrderBookStore } from '@/store/orderBook'
 import { queryClient } from '@/lib/queryClient'
+import { OrderSide, OrderStatus } from '@/types/enums'
+
+interface UserOrderQueryParams {
+  page?: number
+  pageSize?: number
+  'Filter.Side'?: OrderSide
+  'Filter.Status'?: OrderStatus
+  'Filter.Symbol'?: string
+  'SortBy'?: string
+  'SortOrder'?: 'asc' | 'desc'
+}
 
 export const useOrderBook = (symbol: string) => {
   const setOrderBook = useOrderBookStore((state) => state.setOrderBook)
@@ -12,7 +24,8 @@ export const useOrderBook = (symbol: string) => {
     queryKey: ['orderBook', symbol],
     queryFn: async () => {
       const response = await api.get<ApiResponse<OrderBookResponse>>(`/orders/book/${symbol}`)
-      const data = response.data.data
+      // Validate the response data with Zod schema
+      const data = OrderBookResponseSchema.parse(response.data.data)
       if (data) {
         // Aggregate OrderDto[] into OrderBookLevel[]
         const aggregate = (orders: OrderDto[]) => {
@@ -65,15 +78,26 @@ export const useCancelOrder = () => {
   })
 }
 
-export const useUserOrders = (userId: string | null) => {
+export const useUserOrders = (queryParams: UserOrderQueryParams) => {
   return useQuery({
-    queryKey: ['userOrders', userId],
+    queryKey: ['userOrders', queryParams],
     queryFn: async () => {
-      if (!userId) return []
-      const response = await api.get<ApiResponse<OrderDto[]>>(`/orders/user/${userId}`)
-      return response.data.data || []
+      const params = new URLSearchParams()
+      for (const key in queryParams) {
+        const value = queryParams[key as keyof UserOrderQueryParams]
+        if (value !== undefined) {
+          params.append(key, String(value))
+        }
+      }
+      const queryString = params.toString()
+      const response = await api.get<ApiResponse<OrderListResponseDto>>(`/orders/user-orders?${queryString}`)
+      
+      const parsedData = OrderListResponseDtoSchema.parse(response.data.data) 
+      return parsedData || { 
+        orders: { items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
+        summary: { totalOrders: 0, openOrders: 0, filledOrders: 0, cancelledOrders: 0, totalVolume: 0, fillRate: 0 }
+      }
     },
-    enabled: !!userId,
   })
 }
 
@@ -86,3 +110,4 @@ export const useSymbols = () => {
     },
   })
 }
+

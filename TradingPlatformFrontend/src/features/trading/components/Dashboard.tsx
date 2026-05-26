@@ -75,7 +75,7 @@ export const TradingDashboard: React.FC = () => {
             className="bg-card overflow-hidden shrink-0"
             style={{ height: `${ordersHeight}px` }}
           >
-             <OpenOrders userId={userId} />
+             <OpenOrders />
           </div>
         </section>
 

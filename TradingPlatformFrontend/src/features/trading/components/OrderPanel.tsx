@@ -43,8 +43,8 @@ export const OrderPanel: React.FC<OrderPanelProps> = ({ symbol }) => {
     e.preventDefault()
     placeOrder.mutate({
       symbol,
-      price: Math.round(parseFloat(price)),
-      quantity: Math.round(parseFloat(quantity)),
+      price: parseFloat(price),
+      quantity: parseFloat(quantity),
       side,
     }, {
         onSuccess: () => {

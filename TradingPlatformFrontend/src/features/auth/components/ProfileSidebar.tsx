@@ -13,8 +13,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useAccount } from '../api/auth.api'
 
 interface ProfileSidebarProps {
-  activeTab: 'overview' | 'update'
-  onTabChange: (tab: 'overview' | 'update') => void
+  activeTab: 'overview' | 'update' | 'orders'
+  onTabChange: (tab: 'overview' | 'update' | 'orders') => void
 }
 
 export const ProfileSidebar = ({ activeTab, onTabChange }: ProfileSidebarProps) => {
@@ -70,8 +70,16 @@ export const ProfileSidebar = ({ activeTab, onTabChange }: ProfileSidebarProps) 
             <UserCircle size={18} className={cn(activeTab === 'overview' ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
             Profile
           </button>
-          <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            <FileText size={18} />My orders
+          <button 
+            onClick={() => onTabChange('orders')}
+            className={cn(
+              "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors relative group",
+              activeTab === 'orders' ? "text-foreground bg-muted/50" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {activeTab === 'orders' && <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />}
+            <FileText size={18} className={cn(activeTab === 'orders' ? "text-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+            My orders
           </button>
           <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
             <BarChart2 size={18} />Positions

@@ -132,8 +132,21 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                     && stateChange.Status == OrderStatus.Cancelled
                     && stateChange.RemainingQuantity > 0)
                 {
+                    decimal releaseAmount;
+                    if (order.Type == OrderType.Limit)
+                    {
+                        releaseAmount = order.Price.Value * stateChange.RemainingQuantity;
+                    }
+                    else // Market order
+                    {
+                        var spentInThisBatch = accepted.Trades
+                            .Where(t => t.BuyOrderId == order.Id)
+                            .Sum(t => t.Price * t.Quantity);
+                        releaseAmount = order.ReservedAmount - spentInThisBatch;
+                    }
+
                     var release = new Money(
-                        order.Price.Value * stateChange.RemainingQuantity,
+                        releaseAmount,
                         accounts[order.UserId].Balance.Currency);
 
                     accounts[order.UserId].ReleaseReservedFunds(release);

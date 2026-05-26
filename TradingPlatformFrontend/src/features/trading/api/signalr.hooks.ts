@@ -5,6 +5,8 @@ import { useOrderBookStore } from '@/store/orderBook'
 import type { TradeNotification, OrderBookNotification, OrderStatusNotification } from '@/types/notifications'
 import { queryClient } from '@/lib/queryClient'
 import { OrderSide } from '@/types/enums/order-side.enum'
+import { HubConnectionState } from '@microsoft/signalr'
+import { useAuthStore } from '@/store/auth'
 
 export function useMarketDataSignalR(symbol: string) {
   const addTrade = useTradesStore((state) => state.addTrade)
@@ -47,13 +49,18 @@ export function useMarketDataSignalR(symbol: string) {
     return () => {
       market.off('TradeExecuted', handleTrade)
       market.off('OrderBookUpdated', handleOrderBook)
-      market.leaveSymbol(symbol).catch(console.error)
+      if (market.connectionState === HubConnectionState.Connected) { // Use connectionState getter
+        market.leaveSymbol(symbol).catch(console.error)
+      }
       market.disconnect().catch(console.error)
     }
   }, [symbol, addTrade, updateOrderBook])
 }
 
 export function useOrdersSignalR() {
+  const userId = useAuthStore((state) => state.userId)
+  const hasHydrated = useAuthStore.persist.hasHydrated() // Corrected way to access hasHydrated
+
   useEffect(() => {
     const orders = new OrderConnection()
 
@@ -72,11 +79,13 @@ export function useOrdersSignalR() {
       }
     }
 
-    startConnection()
+    if (userId && hasHydrated) { // Only connect if userId is available AND store has hydrated
+      startConnection()
+    }
 
     return () => {
       orders.off('OrderStatusChanged', handleOrderStatus)
       orders.disconnect().catch(console.error)
     }
-  }, [])
+  }, [userId, hasHydrated]) // Add hasHydrated to dependency array
 }

@@ -9,6 +9,7 @@ export const OrderBookLevelSchema = z.object({
 
 export type OrderBookLevel = z.infer<typeof OrderBookLevelSchema>
 
+
 export const OrderBookStateSchema = z.object({
   symbol: z.string().nullable(),
   bids: z.array(OrderBookLevelSchema),
@@ -17,13 +18,21 @@ export const OrderBookStateSchema = z.object({
 
 export type OrderBookState = z.infer<typeof OrderBookStateSchema>
 
+export const PriceSchema = z.object({
+  amount: z.number(),
+  currency: z.string(),
+})
+
+export type Price = z.infer<typeof PriceSchema>
+
 export const OrderDtoSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
-  symbol: z.string(),
+  symbolName: z.string(),
   price: z.number(),
   quantity: z.number(),
   remainingQuantity: z.number(),
+  filledQuantity: z.number().optional(),
   side: z.nativeEnum(OrderSide),
   status: z.nativeEnum(OrderStatus),
   createdAt: z.number(),
@@ -39,3 +48,49 @@ export const OrderBookResponseSchema = z.object({
 })
 
 export type OrderBookResponse = z.infer<typeof OrderBookResponseSchema>
+
+export const OrderListDtoSchema = OrderDtoSchema
+
+export type OrderListDto = z.infer<typeof OrderListDtoSchema>
+
+export const PagedResultSchema = z.object({
+  items: z.array(OrderListDtoSchema),
+  totalCount: z.number(),
+  page: z.number(),
+  pageSize: z.number(),
+  totalPages: z.number(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean(),
+})
+
+export type PagedResult<T> = z.infer<typeof PagedResultSchema> & {
+  items: T[];
+};
+
+export const OrderSummaryDtoSchema = z.object({
+  totalOrders: z.number(),
+  openOrders: z.number(),
+  filledOrders: z.number(),
+  cancelledOrders: z.number(),
+  totalVolume: z.number(),
+  fillRate: z.number(),
+})
+
+export type OrderSummaryDto = z.infer<typeof OrderSummaryDtoSchema>
+
+export const SortingOptionsSchema = z.object({
+  sortBy: z.string(),
+  sortOrder: z.string(),
+})
+
+export type SortingOptions = z.infer<typeof SortingOptionsSchema>
+
+export const OrderListResponseDtoSchema = z.object({
+  orders: PagedResultSchema,
+  summary: OrderSummaryDtoSchema,
+  sorting: SortingOptionsSchema.nullable().optional(),
+})
+
+export type OrderListResponseDto = z.infer<typeof OrderListResponseDtoSchema>
+
+

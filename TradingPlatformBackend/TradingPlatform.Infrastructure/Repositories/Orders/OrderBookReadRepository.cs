@@ -22,14 +22,14 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
         var buyOrders = await _dbContext.Orders
                 .Include(o => o.Symbol)
                 .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Buy)
-            .OrderByDescending(o => o.Price.Value)
+            .OrderByDescending(o => o.Price)
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 
         var sellOrders = await _dbContext.Orders
                 .Include(o => o.Symbol)
                 .Where(o => o.Symbol.Name == symbol.Value && o.Side == Domain.Enums.OrderSide.Sell)
-            .OrderBy(o => o.Price.Value)
+            .OrderBy(o => o.Price)
             .ThenBy(o => o.CreatedAt)
             .ToListAsync(cancellationToken);
 

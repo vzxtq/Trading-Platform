@@ -61,6 +61,10 @@ class BaseHubConnection {
     }
   }
 
+  get connectionState(): HubConnectionState {
+    return this.connection?.state || HubConnectionState.Disconnected
+  }
+
   on(eventName: string, handler: (...args: any[]) => void): void {
     if (!this.connection) {
       this.connection = this.buildConnection()

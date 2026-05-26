@@ -11,6 +11,13 @@ public class Price : IEquatable<Price>, IComparable<Price>
     public Price()
     { }
 
+    private Price(decimal value, bool isMarket)
+    {
+        Value = Math.Round(value, 2);
+    }
+
+    public static Price Market() => new Price(0, true);
+
     public Price(decimal value)
     {
         if (value <= 0)
