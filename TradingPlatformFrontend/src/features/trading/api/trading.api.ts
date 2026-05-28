@@ -12,7 +12,7 @@ interface UserOrderQueryParams {
   pageSize?: number
   'Filter.Side'?: OrderSide
   'Filter.Status'?: OrderStatus
-  'Filter.Symbol'?: string
+
   'SortBy'?: string
   'SortOrder'?: 'asc' | 'desc'
 }
@@ -25,7 +25,12 @@ export const useOrderBook = (symbol: string) => {
     queryFn: async () => {
       const response = await api.get<ApiResponse<OrderBookResponse>>(`/orders/book/${symbol}`)
       // Validate the response data with Zod schema
-      const data = OrderBookResponseSchema.parse(response.data.data)
+      const parseResult = OrderBookResponseSchema.safeParse(response.data.data)
+      if (!parseResult.success) {
+        console.error('OrderBook schema mismatch:', parseResult.error)
+        return null
+      }
+      const data = parseResult.data
       if (data) {
         // Aggregate OrderDto[] into OrderBookLevel[]
         const aggregate = (orders: OrderDto[]) => {
@@ -92,7 +97,15 @@ export const useUserOrders = (queryParams: UserOrderQueryParams) => {
       const queryString = params.toString()
       const response = await api.get<ApiResponse<OrderListResponseDto>>(`/orders/user-orders?${queryString}`)
       
-      const parsedData = OrderListResponseDtoSchema.parse(response.data.data) 
+      const parseResult = OrderListResponseDtoSchema.safeParse(response.data.data)
+      if (!parseResult.success) {
+        console.error('OrderList schema mismatch:', parseResult.error)
+        return {
+          orders: { items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
+          summary: { totalOrders: 0, openOrders: 0, filledOrders: 0, cancelledOrders: 0, totalVolume: 0, fillRate: 0 }
+        }
+      }
+      const parsedData = parseResult.data
       return parsedData || { 
         orders: { items: [], totalCount: 0, page: 1, pageSize: 10, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
         summary: { totalOrders: 0, openOrders: 0, filledOrders: 0, cancelledOrders: 0, totalVolume: 0, fillRate: 0 }

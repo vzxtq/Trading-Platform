@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { createChart, ColorType, LineSeries, type ISeriesApi } from 'lightweight-charts'
 import { useThemeStore } from '@/store/theme'
+import { useTradesStore } from '@/store/trades'
 
 interface PriceChartProps {
   symbol: string
@@ -11,6 +12,10 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
   const chartRef = useRef<any>(null)
   const seriesRef = useRef<ISeriesApi<"Line"> | null>(null)
   const { theme } = useThemeStore()
+  const recent = useTradesStore((state) => state.recent)
+
+  const hasData = recent.filter(t => t.symbol === symbol).length > 0
+  const lastTrade = recent.find(t => t.symbol === symbol)
 
   useEffect(() => {
     if (!chartContainerRef.current) return
@@ -51,13 +56,18 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
       lastValueVisible: true,
     })
 
-    // Mock Data
-    const mockData = Array.from({ length: 100 }).map((_, i) => ({
-      time: (Math.floor(Date.now() / 1000) - (100 - i) * 60) as any,
-      value: 150 + Math.random() * 10 - 5,
-    }))
+    const filteredTrades = recent
+      .filter(t => t.symbol === symbol)
+      .slice()
+      .reverse()
+      .map(t => ({
+        time: Math.floor(t.executedAt / 1000) as any,
+        value: t.price,
+      }))
 
-    lineSeries.setData(mockData)
+    if (filteredTrades.length > 0) {
+      lineSeries.setData(filteredTrades)
+    }
     
     chartRef.current = chart
     seriesRef.current = lineSeries
@@ -68,16 +78,27 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
       window.removeEventListener('resize', handleResize)
       chart.remove()
     }
-  }, [symbol, theme])
+  }, [symbol, theme, recent])
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex flex-col relative">
       <div className="p-2 border-b border-border flex justify-between items-center bg-card">
         <span className="text-xs font-bold text-foreground uppercase tracking-wider">{symbol} / USD</span>
         <div className="flex gap-2">
-            <span className="text-[10px] text-green-500 font-mono">+1.25%</span>
+            {lastTrade ? (
+              <span className="text-[10px] text-green-500 font-mono">
+                ${lastTrade.price.toFixed(2)}
+              </span>
+            ) : (
+              <span className="text-[10px] text-muted-foreground/50 font-mono">--</span>
+            )}
         </div>
       </div>
+      {!hasData && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center text-muted-foreground/40 text-xs font-bold uppercase tracking-widest pointer-events-none">
+          Waiting for trades...
+        </div>
+      )}
       <div ref={chartContainerRef} className="flex-1" />
     </div>
   )

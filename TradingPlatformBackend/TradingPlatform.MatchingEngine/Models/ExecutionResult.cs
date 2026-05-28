@@ -1,4 +1,5 @@
 using TradingEngine.Domain.ValueObjects;
+using TradingEngine.MatchingEngine.Models.Notifications;
 
 namespace TradingEngine.MatchingEngine.Models;
 
@@ -17,6 +18,7 @@ public abstract record ExecutionResult
     {
         public required IReadOnlyList<ExecutedTrade> Trades { get; init; }
         public required IReadOnlyList<OrderStateChange> StateChanges { get; init; }
+        public required IReadOnlyList<OrderBookStateChangeDto> OrderBookChanges { get; init; }
 
         public bool HasTrades => Trades.Count > 0;
     }

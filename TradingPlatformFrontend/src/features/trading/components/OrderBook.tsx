@@ -32,7 +32,11 @@ export const OrderBook: React.FC<OrderBookProps> = ({ symbol }) => {
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {/* Asks */}
         <div className="flex flex-col">
-          {sortedAsks.map((level, i) => (
+          {sortedAsks.length === 0 ? (
+            <div className="py-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-red-500/30">
+              No sell orders
+            </div>
+          ) : sortedAsks.map((level, i) => (
             <div key={`ask-${i}`} className="relative h-5 flex justify-between items-center px-2 hover:bg-accent transition-colors group cursor-pointer">
               <div 
                 className="absolute right-0 top-0 bottom-0 bg-red-500/10 transition-all duration-300" 
@@ -53,7 +57,11 @@ export const OrderBook: React.FC<OrderBookProps> = ({ symbol }) => {
 
         {/* Bids */}
         <div className="flex flex-col">
-          {sortedBids.map((level, i) => (
+          {sortedBids.length === 0 ? (
+            <div className="py-4 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-green-500/30">
+              No buy orders
+            </div>
+          ) : sortedBids.map((level, i) => (
             <div key={`bid-${i}`} className="relative h-5 flex justify-between items-center px-2 hover:bg-accent transition-colors group cursor-pointer">
               <div 
                 className="absolute right-0 top-0 bottom-0 bg-green-500/10 transition-all duration-300" 

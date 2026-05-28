@@ -49,7 +49,26 @@ export const OrderBookResponseSchema = z.object({
 
 export type OrderBookResponse = z.infer<typeof OrderBookResponseSchema>
 
-export const OrderListDtoSchema = OrderDtoSchema
+export const MoneyDtoSchema = z.object({
+  amount: z.number(),
+  currency: z.string(),
+})
+
+export type MoneyDto = z.infer<typeof MoneyDtoSchema>
+
+export const OrderListDtoSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  symbolName: z.string(),
+  price: MoneyDtoSchema,
+  quantity: z.number(),
+  filledQuantity: z.number(),
+  remainingQuantity: z.number(),
+  side: z.nativeEnum(OrderSide),
+  status: z.nativeEnum(OrderStatus),
+  createdAt: z.number(),
+  updatedAt: z.number().nullable().optional(),
+})
 
 export type OrderListDto = z.infer<typeof OrderListDtoSchema>
 

@@ -17,6 +17,7 @@ export const OpenOrders: React.FC<OpenOrdersProps> = () => {
   })
   const orders = responseData?.orders?.items || []
   const cancelOrder = useCancelOrder()
+  const [cancellingIds, setCancellingIds] = React.useState<Set<string>>(new Set())
 
   // No need to filter locally anymore as the API handles it
   const openOrders = orders
@@ -44,18 +45,29 @@ export const OpenOrders: React.FC<OpenOrdersProps> = () => {
                 {order.side === OrderSide.Buy ? 'BUY' : 'SELL'}
               </span>
               <span className="w-[15%] font-medium text-foreground">{order.symbolName}</span>
-              <span className="w-[20%] text-right font-mono text-foreground">{order.price.toFixed(2)}</span>
+              <span className="w-[20%] text-right font-mono text-foreground">{order.price.amount.toFixed(2)}</span>
               <span className="w-[20%] text-right font-mono text-foreground">
                 {(order.filledQuantity ?? 0).toFixed(2)}
               </span>
-              <span className="w-[20%] text-right font-mono text-muted-foreground">{(order.price * order.quantity).toFixed(2)}</span>
+              <span className="w-[20%] text-right font-mono text-muted-foreground">{(order.price.amount * order.quantity).toFixed(2)}</span>
               <div className="w-[15%] text-right">
                 <button
-                  onClick={() => cancelOrder.mutate(order.id)}
-                  disabled={cancelOrder.isPending}
+                  onClick={() => {
+                    setCancellingIds(prev => new Set(prev).add(order.id))
+                    cancelOrder.mutate(order.id, {
+                      onSettled: () => {
+                        setCancellingIds(prev => {
+                          const next = new Set(prev)
+                          next.delete(order.id)
+                          return next
+                        })
+                      }
+                    })
+                  }}
+                  disabled={cancellingIds.has(order.id)}
                   className="text-destructive hover:text-destructive font-bold uppercase text-[10px] transition-colors disabled:opacity-50"
                 >
-                  {cancelOrder.isPending ? '...' : 'Cancel'}
+                  {cancellingIds.has(order.id) ? '...' : 'Cancel'}
                 </button>
               </div>
             </div>

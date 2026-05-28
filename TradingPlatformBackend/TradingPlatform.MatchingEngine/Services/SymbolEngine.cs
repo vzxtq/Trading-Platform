@@ -1,6 +1,7 @@
 using TradingEngine.Domain.Enums;
 using TradingEngine.MatchingEngine.Commands;
 using TradingEngine.MatchingEngine.Models;
+using TradingEngine.MatchingEngine.Models.Notifications;
 
 namespace TradingEngine.MatchingEngine.Services;
 
@@ -69,6 +70,8 @@ public sealed class SymbolEngine
         if (!taker.IsFullyMatched && taker.Type == OrderType.Limit)
             _orderBook.AddOrder(taker);
 
+        var orderBookChanges = ComputeOrderBookChanges(trades, taker);
+
         return new ExecutionResult.Accepted
         {
             Symbol = command.Symbol,
@@ -76,7 +79,8 @@ public sealed class SymbolEngine
             SequenceId = sequenceId,
             EngineTimestamp = engineTimestamp,
             Trades = trades,
-            StateChanges = stateChanges
+            StateChanges = stateChanges,
+            OrderBookChanges = orderBookChanges
         };
     }
 
@@ -95,6 +99,16 @@ public sealed class SymbolEngine
 
         _orderBook.RemoveOrder(command.OrderId);
 
+        var isBuy = order.Side == OrderSide.Buy;
+        var remaining = isBuy
+            ? _orderBook.GetBidOrders().Where(o => o.Price == order.Price).Sum(o => o.RemainingQuantity)
+            : _orderBook.GetAskOrders().Where(o => o.Price == order.Price).Sum(o => o.RemainingQuantity);
+            
+        var orderBookChanges = new List<OrderBookStateChangeDto>
+        {
+            new OrderBookStateChangeDto(order.Price, remaining, isBuy)
+        };
+
         var stateChange = new OrderStateChange(
             command.OrderId,
             order.UserId,
@@ -109,7 +123,8 @@ public sealed class SymbolEngine
             SequenceId = sequenceId,
             EngineTimestamp = engineTimestamp,
             Trades = [],
-            StateChanges = [stateChange]
+            StateChanges = [stateChange],
+            OrderBookChanges = orderBookChanges
         };
     }
 
@@ -182,6 +197,38 @@ public sealed class SymbolEngine
         return taker.Side == OrderSide.Buy
             ? taker.Price >= maker.Price
             : taker.Price <= maker.Price;
+    }
+
+    private List<OrderBookStateChangeDto> ComputeOrderBookChanges(List<ExecutedTrade> trades, EngineOrder taker)
+    {
+        var changes = new List<OrderBookStateChangeDto>();
+        var updatedPrices = new HashSet<decimal>();
+
+        // For maker side changes from trades
+        var makerIsBuy = taker.Side == OrderSide.Sell;
+        foreach (var trade in trades)
+        {
+            if (updatedPrices.Add(trade.Price))
+            {
+                var remaining = makerIsBuy
+                    ? _orderBook.GetBidOrders().Where(o => o.Price == trade.Price).Sum(o => o.RemainingQuantity)
+                    : _orderBook.GetAskOrders().Where(o => o.Price == trade.Price).Sum(o => o.RemainingQuantity);
+                
+                changes.Add(new OrderBookStateChangeDto(trade.Price, remaining, makerIsBuy));
+            }
+        }
+
+        // For taker side changes (limit orders that are partially or entirely unmatched)
+        if (taker.Type == OrderType.Limit && taker.RemainingQuantity > 0)
+        {
+            var remaining = taker.Side == OrderSide.Buy
+                ? _orderBook.GetBidOrders().Where(o => o.Price == taker.Price).Sum(o => o.RemainingQuantity)
+                : _orderBook.GetAskOrders().Where(o => o.Price == taker.Price).Sum(o => o.RemainingQuantity);
+
+            changes.Add(new OrderBookStateChangeDto(taker.Price, remaining, taker.Side == OrderSide.Buy));
+        }
+
+        return changes;
     }
 
     public OrderBookSnapshot Snapshot() => _orderBook.Snapshot();

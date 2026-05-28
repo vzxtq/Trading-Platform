@@ -32,11 +32,7 @@ export const UserOrders = () => {
       'SortOrder': sortOrder,
     }
 
-    if (searchQuery) {
-      // Assuming backend can search by symbol or ID via a single filter param
-      params['Filter.Symbol'] = searchQuery 
-      // If backend had a generic search, we'd use that, e.g., params['Filter.Search'] = searchQuery
-    }
+
 
     if (statusFilter !== 'All') {
       // Map frontend status filter to backend enum value
@@ -65,12 +61,13 @@ export const UserOrders = () => {
     }
 
     return params
-  }, [currentPage, pageSize, searchQuery, statusFilter, sideFilter, sortBy, sortOrder])
+  }, [currentPage, pageSize, statusFilter, sideFilter, sortBy, sortOrder])
 
   const { data: responseData, isLoading } = useUserOrders(queryParams)
   const pagedOrders = responseData?.orders
   const orders = pagedOrders?.items || []
   const cancelOrder = useCancelOrder()
+  const [cancellingIds, setCancellingIds] = useState<Set<string>>(new Set())
   
   // Stats calculation
   const stats = useMemo(() => {
@@ -83,14 +80,21 @@ export const UserOrders = () => {
     const cancelled = summary?.cancelledOrders || 0
     const volume = summary?.totalVolume || 0
     
-    const fillRate = summary?.fillRate ? summary.fillRate * 100 : (total > 0 ? (filled / total) * 100 : 0)
+    const fillRate = summary?.fillRate ?? (total > 0 ? (filled / total) * 100 : 0)
     const cancelledRate = total > 0 ? (cancelled / total) * 100 : 0
 
     return { total, open, filled, cancelled, volume, fillRate, cancelledRate }
   }, [responseData])
 
-  // Filtering is now handled by the backend, so filteredOrders becomes just orders
-  const filteredOrders = orders
+  // Filter the current page locally for the search query
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery) return orders;
+    const q = searchQuery.toLowerCase();
+    return orders.filter(o => 
+      o.symbolName.toLowerCase().includes(q) || 
+      o.id.toLowerCase().includes(q)
+    );
+  }, [orders, searchQuery]);
 
   const getStatusColor = (status: OrderStatus) => {
     switch (status) {
@@ -260,7 +264,7 @@ export const UserOrders = () => {
               </tr>
             ) : (
               filteredOrders.map((order) => {
-                const totalAmount = order.price * order.quantity
+                const totalAmount = order.price.amount * order.quantity
 
                 return (
                   <tr key={order.id} className="hover:bg-muted/20 transition-colors group">
@@ -293,7 +297,7 @@ export const UserOrders = () => {
                       <span className="text-[10px] font-bold text-muted-foreground uppercase">Limit</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-xs font-bold text-foreground font-mono">${formatAmount(order.price)}</span>
+                      <span className="text-xs font-bold text-foreground font-mono">${formatAmount(order.price.amount)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <span className="text-xs font-bold text-foreground font-mono">{order.quantity.toFixed(4)}</span>
@@ -324,9 +328,20 @@ export const UserOrders = () => {
                             variant="ghost"
                             size="sm"
                             className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => cancelOrder.mutate(order.id)}
-                            disabled={cancelOrder.isPending}
-                          >                            Cancel
+                            onClick={() => {
+                              setCancellingIds(prev => new Set(prev).add(order.id))
+                              cancelOrder.mutate(order.id, {
+                                onSettled: () => {
+                                  setCancellingIds(prev => {
+                                    const next = new Set(prev)
+                                    next.delete(order.id)
+                                    return next
+                                  })
+                                }
+                              })
+                            }}
+                            disabled={cancellingIds.has(order.id)}
+                          >                            {cancellingIds.has(order.id) ? '...' : 'Cancel'}
                           </Button>
                         )}
                       </div>

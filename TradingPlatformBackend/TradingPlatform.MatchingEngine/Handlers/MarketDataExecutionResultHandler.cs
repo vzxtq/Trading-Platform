@@ -59,6 +59,14 @@ public class MarketDataExecutionResultHandler : IExecutionResultHandler
                     await _notifier.NotifyOrderStatusChangedAsync(stateChange.UserId.ToString(), notification, cancellationToken);
                 }
             }
+
+            if (accepted.OrderBookChanges != null && accepted.OrderBookChanges.Count > 0)
+            {
+                var notification = new OrderBookNotification(
+                    accepted.Symbol.Value,
+                    accepted.OrderBookChanges.ToList());
+                await _notifier.NotifyOrderBookUpdatedAsync(notification, cancellationToken);
+            }
         }
         catch (Exception)
         {
