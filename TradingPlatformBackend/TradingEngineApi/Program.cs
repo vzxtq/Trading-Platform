@@ -28,6 +28,7 @@ app.UseCors(CorsPolicyNames.Frontend);
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapHub<MarketDataHub>("/hubs/market");
 app.MapHub<OrderHub>("/hubs/orders");

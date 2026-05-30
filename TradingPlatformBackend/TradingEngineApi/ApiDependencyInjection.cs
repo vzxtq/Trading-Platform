@@ -3,18 +3,26 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 using TradingEngine.Api.Common;
 using TradingEngine.Api.Hubs;
 using TradingEngine.Api.Services;
 using TradingEngine.Application.Options;
 using TradingEngine.MatchingEngine.Interfaces;
+using TradingEngineApi.Common;
 using TradingEngineApi.Validators;
 
 namespace TradingEngine.Api
 {
     public static class ApiDependencyInjection
     {
+        private static readonly string[] errors =
+        [
+            "Rate limit exceeded. Maximum 10 requests per 10 seconds."
+        ];
+
         public static IServiceCollection AddApiServices(
             this IServiceCollection services,
             IConfiguration configuration,
@@ -30,6 +38,7 @@ namespace TradingEngine.Api
                 {
                     options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
                 });
+
             services.AddSignalR();
             services.AddSingleton<IMarketDataNotifier, SignalRMarketDataNotifier>();
 
@@ -105,6 +114,39 @@ namespace TradingEngine.Api
 
             services.AddHttpContextAccessor();
             services.AddScoped<Application.Interfaces.IUserResolverService, UserResolverService>();
+
+            services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                options.OnRejected = async (context, token) =>
+                {
+                    var response = ApiResponse.FailureResponse(
+                        errors: errors,
+                        message: "Too Many Requests");
+
+                    await context.HttpContext.Response.WriteAsJsonAsync(
+                        response,
+                        cancellationToken: token);
+                };
+
+                options.AddPolicy("OrderPlacement", httpContext =>
+                {
+                    var userId = httpContext.User
+                        .FindFirst(ClaimTypes.NameIdentifier)?
+                        .Value ?? "anonymous";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        userId,
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 10,
+                            Window = TimeSpan.FromSeconds(10),
+                            QueueLimit = 0,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        });
+                });
+            });
 
             return services;
         }

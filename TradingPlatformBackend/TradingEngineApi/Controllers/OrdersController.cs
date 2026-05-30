@@ -5,6 +5,7 @@ using TradingEngine.Application.Features.Orders.Queries;
 using TradingEngineApi.Extensions;
 using TradingEngine.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace TradingEngine.Api.Controllers;
 
@@ -28,6 +29,7 @@ public class OrdersController : ApiController
     }
 
     [HttpPost]
+    [EnableRateLimiting("OrderPlacement")]
     public async Task<IActionResult> PlaceOrder(
         [FromBody] PlaceOrderCommand command,
         CancellationToken ct)
