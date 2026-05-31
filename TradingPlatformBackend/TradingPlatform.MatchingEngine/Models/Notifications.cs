@@ -10,11 +10,16 @@ public record TradeNotification(
 
 public record OrderBookNotification(
     string Symbol,
-    List<OrderBookStateChangeDto> StateChanges);
+    List<OrderBookEntry> StateChanges);
 
-public record OrderBookStateChangeDto(
+public record OrderBookEntry(
     decimal Price,
     decimal Quantity,
+    bool IsBuy);
+
+public record OrderBookStateChangeDto(
+    long Price,
+    long Quantity,
     bool IsBuy);
 
 public record OrderStatusNotification(

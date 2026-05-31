@@ -55,7 +55,9 @@ public sealed class SymbolEngine
         var takerStatus = taker.IsFullyMatched
             ? OrderStatus.Filled
             : taker.Type == OrderType.Market
-                ? OrderStatus.Cancelled // Market orders that aren't fully matched are cancelled
+                ? taker.FilledQuantity > 0
+                    ? OrderStatus.PartiallyFilledCancelled
+                    : OrderStatus.Cancelled
                 : trades.Count > 0
                     ? OrderStatus.PartiallyFilled
                     : OrderStatus.Open;
@@ -162,7 +164,10 @@ public sealed class SymbolEngine
             maker.Fill(quantity);
 
             if (taker.Side == OrderSide.Buy)
-                takerCostSoFar += quantity * maker.Price;
+            {
+                //checked to prevent silent overflow which could lead to accepting orders that exceed the max total cost
+                takerCostSoFar = checked(takerCostSoFar + (quantity * maker.Price));
+            }
 
             trades.Add(new ExecutedTrade(
                 TradeId: Guid.NewGuid(),
@@ -202,18 +207,23 @@ public sealed class SymbolEngine
     private List<OrderBookStateChangeDto> ComputeOrderBookChanges(List<ExecutedTrade> trades, EngineOrder taker)
     {
         var changes = new List<OrderBookStateChangeDto>();
-        var updatedPrices = new HashSet<decimal>();
+        var updatedPrices = new HashSet<long>();
 
         // For maker side changes from trades
         var makerIsBuy = taker.Side == OrderSide.Sell;
+        var makerOrders = makerIsBuy
+            ? _orderBook.GetBidOrders()
+            : _orderBook.GetAskOrders();
+
+        var remainingByPrice = makerOrders
+            .GroupBy(o => o.Price)
+            .ToDictionary(g => g.Key, g => g.Sum(o => o.RemainingQuantity));
+
         foreach (var trade in trades)
         {
             if (updatedPrices.Add(trade.Price))
             {
-                var remaining = makerIsBuy
-                    ? _orderBook.GetBidOrders().Where(o => o.Price == trade.Price).Sum(o => o.RemainingQuantity)
-                    : _orderBook.GetAskOrders().Where(o => o.Price == trade.Price).Sum(o => o.RemainingQuantity);
-                
+                remainingByPrice.TryGetValue(trade.Price, out var remaining);
                 changes.Add(new OrderBookStateChangeDto(trade.Price, remaining, makerIsBuy));
             }
         }
@@ -221,9 +231,13 @@ public sealed class SymbolEngine
         // For taker side changes (limit orders that are partially or entirely unmatched)
         if (taker.Type == OrderType.Limit && taker.RemainingQuantity > 0)
         {
-            var remaining = taker.Side == OrderSide.Buy
-                ? _orderBook.GetBidOrders().Where(o => o.Price == taker.Price).Sum(o => o.RemainingQuantity)
-                : _orderBook.GetAskOrders().Where(o => o.Price == taker.Price).Sum(o => o.RemainingQuantity);
+            var takerOrders = taker.Side == OrderSide.Buy
+                ? _orderBook.GetBidOrders()
+                : _orderBook.GetAskOrders();
+
+            var remaining = takerOrders
+                .Where(o => o.Price == taker.Price)
+                .Sum(o => o.RemainingQuantity);
 
             changes.Add(new OrderBookStateChangeDto(taker.Price, remaining, taker.Side == OrderSide.Buy));
         }

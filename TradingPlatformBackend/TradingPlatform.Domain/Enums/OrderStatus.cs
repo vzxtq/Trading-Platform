@@ -6,6 +6,7 @@ namespace TradingEngine.Domain.Enums
         PartiallyFilled = 2,  // Partially matched, remainder still in book
         Filled = 3,  // Fully matched, removed from book
         Cancelled = 4,  // Cancelled by user or system
-        Rejected = 5   // Rejected by matching engine (validation failure)
+        Rejected = 5,   // Rejected by matching engine (validation failure)
+        PartiallyFilledCancelled = 6 // Partially matched before being cancelled (e.g. Market order with insufficient liquidity)
     }
 }

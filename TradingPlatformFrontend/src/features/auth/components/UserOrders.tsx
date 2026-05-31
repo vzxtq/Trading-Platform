@@ -117,11 +117,11 @@ export const UserOrders = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">My orders</h1>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold uppercase tracking-wider border-border bg-background">
+          <Button variant="outline" size="sm" className="h-9 gap-2 text-sm font-semibold border-border bg-background">
             <SlidersHorizontal size={14} />
             Filters
           </Button>
-          <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold uppercase tracking-wider border-border bg-background">
+          <Button variant="outline" size="sm" className="h-9 gap-2 text-sm font-semibold border-border bg-background">
             <FileDown size={14} />
             Export CSV
           </Button>
@@ -131,38 +131,38 @@ export const UserOrders = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-5 gap-4">
         <div className="bg-card p-5 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-3">Total Orders</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-3">Total Orders</span>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-foreground">{stats.total}</span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-1">All time</span>
+            <span className="text-xs text-muted-foreground font-medium mt-1">All time</span>
           </div>
         </div>
         <div className="bg-card p-5 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-3">Open Orders</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-3">Open Orders</span>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-amber-500">{stats.open}</span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-1">Pending execution</span>
+            <span className="text-xs text-muted-foreground font-medium mt-1">Pending execution</span>
           </div>
         </div>
         <div className="bg-card p-5 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-3">Filled</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-3">Filled</span>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-green-500">{stats.filled}</span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-1">{stats.fillRate.toFixed(1)}% fill rate</span>
+            <span className="text-xs text-muted-foreground font-medium mt-1">{stats.fillRate.toFixed(1)}% fill rate</span>
           </div>
         </div>
         <div className="bg-card p-5 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-3">Cancelled</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-3">Cancelled</span>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-foreground">{stats.cancelled}</span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-1">{stats.cancelledRate.toFixed(1)}% of total</span>
+            <span className="text-xs text-muted-foreground font-medium mt-1">{stats.cancelledRate.toFixed(1)}% of total</span>
           </div>
         </div>
         <div className="bg-card p-5 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-3">Total Volume</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-3">Total Volume</span>
           <div className="flex flex-col">
             <span className="text-2xl font-bold text-foreground">${formatAmount(stats.volume)}</span>
-            <span className="text-[10px] text-muted-foreground font-medium mt-1">USD traded</span>
+            <span className="text-xs text-muted-foreground font-medium mt-1">USD traded</span>
           </div>
         </div>
       </div>
@@ -235,17 +235,17 @@ export const UserOrders = () => {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Order ID</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Symbol</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Side</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Type</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Price</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Quantity</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Filled</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Total</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date</th>
-              <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Order ID</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Symbol</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Side</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Type</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Price</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground text-right">Quantity</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Filled</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground text-right">Total</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Status</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground">Date</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
@@ -265,64 +265,64 @@ export const UserOrders = () => {
                   <tr key={order.id} className="hover:bg-muted/20 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="text-xs font-bold text-foreground">#ORD-{order.id.slice(0, 5).toUpperCase()}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium">Limit</span>
+                        <span className="text-sm font-bold text-foreground">#ORD-{order.id.slice(0, 5).toUpperCase()}</span>
+                        <span className="text-xs text-muted-foreground font-medium">Limit</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+                        <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
                           {order.symbolName[0]}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-foreground">{order.symbolName}</span>
-                          <span className="text-[10px] text-muted-foreground font-medium">Limit</span>
+                          <span className="text-sm font-bold text-foreground">{order.symbolName}</span>
+                          <span className="text-xs text-muted-foreground font-medium">Limit</span>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={cn(
-                        "text-[10px] font-bold uppercase tracking-wider",
+                        "text-xs font-semibold",
                         order.side === OrderSide.Buy ? "text-green-500" : "text-red-500"
                       )}>
                         {order.side === OrderSide.Buy ? 'Buy' : 'Sell'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Limit</span>
+                      <span className="text-xs font-semibold text-muted-foreground">Limit</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-xs font-bold text-foreground font-mono">${formatAmount(order.price.amount)}</span>
+                      <span className="text-sm font-bold text-foreground font-mono">${formatAmount(order.price.amount)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <span className="text-xs font-bold text-foreground font-mono">{order.quantity.toFixed(4)}</span>
+                      <span className="text-sm font-bold text-foreground font-mono">{order.quantity.toFixed(4)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap min-w-[120px]">
-                      <span className="text-xs font-bold text-foreground font-mono">
+                      <span className="text-sm font-bold text-foreground font-mono">
                         {(order.filledQuantity ?? 0).toFixed(2)} // TODO
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-mono">
-                      <span className="text-xs font-bold text-foreground">${formatAmount(totalAmount)}</span>
+                      <span className="text-sm font-bold text-foreground">${formatAmount(totalAmount)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="outline" className={cn("text-[9px] font-bold px-2 py-0 h-5 border", getStatusColor(order.status))}>
-                        {OrderStatusLabels[order.status].toUpperCase()}
+                      <Badge variant="outline" className={cn("text-[10px] font-bold px-2 py-0 h-5 border", getStatusColor(order.status))}>
+                        {OrderStatusLabels[order.status]}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">{formatOrderDate(order.createdAt)}</span>
+                      <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">{formatOrderDate(order.createdAt)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="sm" className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted">
+                        <Button variant="ghost" size="sm" className="h-8 px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted">
                           View
                         </Button>
                         {(order.status === OrderStatus.Open || order.status === OrderStatus.PartiallyFilled) && (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-3 text-[10px] font-bold uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10"
+                            className="h-8 px-3 text-xs font-semibold text-destructive hover:text-destructive hover:bg-destructive/10"
                             onClick={() => {
                               setCancellingIds(prev => new Set(prev).add(order.id))
                               cancelOrder.mutate(order.id, {
@@ -352,7 +352,7 @@ export const UserOrders = () => {
       {/* Pagination */}
       {pagedOrders && pagedOrders.totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
-          <span className="text-[11px] font-medium text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Showing {orders.length} of {pagedOrders.totalCount} orders
           </span>
           <div className="flex items-center gap-1">

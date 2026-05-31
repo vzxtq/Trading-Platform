@@ -5,6 +5,7 @@ using TradingEngine.Domain.Entities;
 using TradingEngine.Domain.Enums;
 using TradingEngine.MatchingEngine.Interfaces;
 using TradingEngine.MatchingEngine.Commands;
+using TradingEngine.MatchingEngine.Scaling;
 using TradingEngine.Application.Common;
 using TradingEngine.Application.Features.Orders.Dtos;
 using TradingEngine.Domain.ValueObjects;
@@ -20,8 +21,8 @@ namespace TradingEngine.Application.Features.Orders.Commands;
 public class PlaceOrderCommand : ICommand<Result<PlaceOrderResponseDto>>
 {
     public string Symbol { get; set; } = string.Empty;
-    public long? Price { get; set; }
-    public long Quantity { get; set; }
+    public decimal? Price { get; set; }
+    public decimal Quantity { get; set; }
     public OrderSide Side { get; set; }
     public OrderType Type { get; set; }
 }
@@ -67,7 +68,7 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
                 return Result<PlaceOrderResponseDto>.Failure("Symbol not found");
 
             var symbolValue = new Symbol(request.Symbol);
-            var price = request.Type == OrderType.Limit ? new Price(request.Price!.Value) : Price.Market();
+            var price = request.Type == OrderType.Limit ? new Price(request.Price!.Value) : null;
             var quantity = new Quantity(request.Quantity);
 
             var account = await _accountRepository.GetByIdAsync(userId, cancellationToken);
@@ -75,43 +76,44 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
                 return Result<PlaceOrderResponseDto>.Failure("Account not found");
 
             // Reserve funds for buy orders up front.
-            long maxTotalCost = 0;
+            decimal domainMaxTotalCost = 0;
             if (request.Side == OrderSide.Buy)
             {
                 if (request.Type == OrderType.Limit)
                 {
-                    maxTotalCost = (long)(price.Value * quantity.Value);
+                    domainMaxTotalCost = price!.Value * quantity.Value;
                 }
                 else // Market order
                 {
                     var snapshot = await _snapshotProvider.GetSnapshotAsync(symbolValue, cancellationToken);
                     var asks = snapshot.Asks;
-                    long costEstimate = 0;
-                    long remainingQuantity = (long)quantity.Value;
+                    long costEstimateEngineUnits = 0;
+                    long remainingEngineQuantity = quantity.Value.ToEngineQuantity();
                     
                     foreach (var ask in asks)
                     {
-                        var fillQuantity = Math.Min(remainingQuantity, ask.TotalQuantity);
-                        costEstimate += fillQuantity * ask.Price;
-                        remainingQuantity -= fillQuantity;
-                        if (remainingQuantity == 0) break;
+                        var fillQuantity = Math.Min(remainingEngineQuantity, ask.TotalQuantity);
+                        costEstimateEngineUnits = checked(costEstimateEngineUnits + (fillQuantity * ask.Price));
+                        remainingEngineQuantity -= fillQuantity;
+                        if (remainingEngineQuantity == 0) break;
                     }
                     
-                    if (remainingQuantity > 0)
+                    if (remainingEngineQuantity > 0)
                         return Result<PlaceOrderResponseDto>.Failure("Insufficient liquidity for market order");
                         
-                    // 5% buffer for slippage
-                    maxTotalCost = (long)(costEstimate * 1.05m);
+                    // 5% buffer for slippage without decimal arithmetic
+                    var costWithSlippageEngineUnits = checked(costEstimateEngineUnits + costEstimateEngineUnits / 20);
+                    domainMaxTotalCost = costWithSlippageEngineUnits.ToDomainNotional();
                 }
 
-                var money = new Money(maxTotalCost, account.Balance.Currency);
+                var money = new Money(domainMaxTotalCost, account.Balance.Currency);
                 account.ReserveFunds(money);
                 await _accountRepository.UpdateAsync(account, cancellationToken);
             }
             else if (request.Side == OrderSide.Sell)
             {
                 var position = await _positionRepository.GetUserPositionForSymbolAsync(userId, request.Symbol, cancellationToken);
-                if (position == null || position.AvailableQuantity.Value < request.Quantity)
+                if (position == null || position.AvailableQuantity.IsLessThan(quantity))
                 {
                     return Result<PlaceOrderResponseDto>.Failure("Insufficient position");
                 }
@@ -122,11 +124,9 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
 
             // For Buy orders, reservedAmount is the monetary amount reserved.
             // For Sell orders, reservedAmount is the quantity of shares reserved.
-            decimal reservedAmount = 0;
-            if (request.Side == OrderSide.Buy)
-                reservedAmount = maxTotalCost;
-            else if (request.Side == OrderSide.Sell)
-                reservedAmount = request.Quantity;
+            decimal reservedAmount = request.Side == OrderSide.Buy 
+                ? domainMaxTotalCost 
+                : quantity.Value;
 
             var order = OrderDomain.Create(
                 userId,
@@ -145,11 +145,11 @@ public sealed class PlaceOrderCommandHandler : ICommandHandler<PlaceOrderCommand
                 UserId = userId,
                 Symbol = symbolValue,
                 SymbolId = symbolEntity.Id,
-                Price = request.Price ?? 0,
-                Quantity = request.Quantity,
+                Price = request.Type == OrderType.Limit ? price!.Value.ToEnginePrice() : 0,
+                Quantity = quantity.Value.ToEngineQuantity(),
                 Side = request.Side,
                 Type = request.Type,
-                MaxTotalCost = maxTotalCost,
+                MaxTotalCost = domainMaxTotalCost.ToEngineNotional(),
                 ReceivedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
 

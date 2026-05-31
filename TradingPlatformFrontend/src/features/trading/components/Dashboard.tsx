@@ -50,7 +50,7 @@ export const TradingDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 grid grid-cols-[220px_1fr_240px] gap-0 overflow-hidden">
         {/* Left Column: Order Book */}
-        <section className="border-r border-border bg-card overflow-hidden flex flex-col">
+        <section className="border-r border-border bg-card overflow-hidden flex flex-col items-start min-h-0">
           <OrderBook symbol={symbol || ''} />
         </section>
 

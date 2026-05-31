@@ -10,11 +10,11 @@ public class OrderPlacedEvent : DomainEvent
 {
     public Guid UserId { get; }
     public Guid SymbolId { get; }
-    public Price Price { get; }
+    public Price? Price { get; }
     public Quantity Quantity { get; }
     public OrderSide Side { get; }
 
-    public OrderPlacedEvent(Guid orderId, Guid userId, Guid symbolId, Price price, Quantity quantity, OrderSide side)
+    public OrderPlacedEvent(Guid orderId, Guid userId, Guid symbolId, Price? price, Quantity quantity, OrderSide side)
     {
         AggregateId = orderId;
         UserId = userId;
@@ -23,4 +23,4 @@ public class OrderPlacedEvent : DomainEvent
         Quantity = quantity;
         Side = side;
     }
-    }
+}

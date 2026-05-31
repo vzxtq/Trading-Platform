@@ -17,7 +17,7 @@ public static class OrderMappers
         Type = order.Type,
         Price = new MoneyDto
         {
-            Amount = order.Price.Value,
+            Amount = order.Price != null ? order.Price.Value : 0,
             Currency = order.Symbol.Currency
         },
         Quantity = order.Quantity.Value,

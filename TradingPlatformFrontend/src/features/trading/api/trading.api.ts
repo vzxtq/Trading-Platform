@@ -58,7 +58,8 @@ export const usePlaceOrder = () => {
     mutationFn: async (order: PlaceOrderRequest) => {
       const response = await api.post<ApiResponse<{ orderId: string; status: string; message: string }>>('/orders', {
         ...order,
-        side: order.side
+        side: order.side,
+        type: order.type
       }, {
         headers: { 'Content-Type': 'application/json' }
       })

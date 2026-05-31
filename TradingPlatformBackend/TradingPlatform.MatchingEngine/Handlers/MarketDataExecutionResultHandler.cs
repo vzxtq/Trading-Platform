@@ -2,6 +2,7 @@ using System.Diagnostics;
 using TradingEngine.MatchingEngine.Interfaces;
 using TradingEngine.MatchingEngine.Models;
 using TradingEngine.MatchingEngine.Models.Notifications;
+using TradingEngine.MatchingEngine.Scaling;
 
 namespace TradingEngine.MatchingEngine.Handlers;
 
@@ -38,8 +39,8 @@ public class MarketDataExecutionResultHandler : IExecutionResultHandler
                 {
                     var notification = new TradeNotification(
                         accepted.Symbol.Value,
-                        trade.Price,
-                        trade.Quantity,
+                        trade.Price.ToDomainPrice(),
+                        trade.Quantity.ToDomainQuantity(),
                         accepted.EngineTimestamp);
                     
                     await _notifier.NotifyTradeExecutedAsync(notification, cancellationToken);
@@ -53,8 +54,8 @@ public class MarketDataExecutionResultHandler : IExecutionResultHandler
                     var notification = new OrderStatusNotification(
                         stateChange.OrderId,
                         stateChange.Status,
-                        stateChange.FilledQuantity,
-                        stateChange.RemainingQuantity);
+                        stateChange.FilledQuantity.ToDomainQuantity(),
+                        stateChange.RemainingQuantity.ToDomainQuantity());
 
                     await _notifier.NotifyOrderStatusChangedAsync(stateChange.UserId.ToString(), notification, cancellationToken);
                 }
@@ -64,7 +65,10 @@ public class MarketDataExecutionResultHandler : IExecutionResultHandler
             {
                 var notification = new OrderBookNotification(
                     accepted.Symbol.Value,
-                    accepted.OrderBookChanges.ToList());
+                    accepted.OrderBookChanges.Select(x => new OrderBookEntry(
+                        x.Price.ToDomainPrice(),
+                        x.Quantity.ToDomainQuantity(),
+                        x.IsBuy)).ToList());
                 await _notifier.NotifyOrderBookUpdatedAsync(notification, cancellationToken);
             }
         }

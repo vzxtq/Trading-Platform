@@ -59,8 +59,8 @@ export const TradingHeader: React.FC<TradingHeaderProps> = ({ userId, symbol, se
         <div className="flex items-center">
           {/* AVAILABLE Section */}
           <div className="flex flex-col items-end px-3">
-            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-none mb-1">Available</span>
-            <span className="text-[13px] text-[#22c55e] font-bold leading-none">
+            <span className="text-xs text-muted-foreground font-semibold leading-none mb-1">Available</span>
+            <span className="text-sm text-[#22c55e] font-bold leading-none">
               {account ? formatCurrency(account.availableBalance.amount, account.availableBalance.currency) : '0.00'}
             </span>
           </div>
@@ -73,8 +73,8 @@ export const TradingHeader: React.FC<TradingHeaderProps> = ({ userId, symbol, se
           {/* RESERVED Section */}
           {account && account.reservedBalance.amount > 0 && (
             <div className="flex flex-col items-end px-3">
-              <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider leading-none mb-1">Reserved</span>
-              <span className="text-[13px] text-amber-500 font-bold leading-none">
+              <span className="text-xs text-muted-foreground font-semibold leading-none mb-1">Reserved</span>
+              <span className="text-sm text-amber-500 font-bold leading-none">
                 {formatCurrency(account.reservedBalance.amount, account.reservedBalance.currency)}
               </span>
             </div>

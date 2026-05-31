@@ -49,7 +49,7 @@ public sealed class OrderBookReadRepository : IOrderBookReadRepository
         UserId = o.UserId,
         SymbolName = o.Symbol.Name,
 
-        Price = o.Price.Value,
+        Price = o.Price != null ? o.Price.Value : 0, //TODO
         Quantity = o.Quantity.Value,
         RemainingQuantity = o.RemainingQuantity.Value,
         Side = o.Side,

@@ -53,7 +53,7 @@ export const ProfileSidebar = ({ activeTab, onTabChange }: ProfileSidebarProps) 
             {account?.firstName} {account?.lastName}
           </h2>
           <p className="text-sm text-muted-foreground mb-3">{account?.email}</p>
-          <div className="inline-block px-2 py-0.5 border border-green-500/20 rounded text-[10px] font-bold text-green-500 uppercase tracking-wider bg-green-500/10">
+          <div className="inline-block px-2 py-0.5 border border-green-500/20 rounded text-xs font-semibold text-green-500 bg-green-500/10">
             Active
           </div>
         </div>

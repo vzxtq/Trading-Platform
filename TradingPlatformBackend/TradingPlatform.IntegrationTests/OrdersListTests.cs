@@ -34,9 +34,9 @@ public class OrdersListTests : IClassFixture<TradingPlatformFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // 1. Place some orders (all BUY to avoid position validation for now)
-        await PlaceOrderAsync("AAPL", 150, 10, OrderSide.Buy);
-        await PlaceOrderAsync("MSFT", 300, 5, OrderSide.Buy);
-        await PlaceOrderAsync("AAPL", 160, 2, OrderSide.Buy); 
+        await PlaceOrderAsync("AAPL", 150.25m, 10.125m, OrderSide.Buy);
+        await PlaceOrderAsync("MSFT", 300.50m, 5.25m, OrderSide.Buy);
+        await PlaceOrderAsync("AAPL", 160.75m, 2.5m, OrderSide.Buy); 
 
         // 2. Get orders list
         var response = await _client.GetAsync("/api/orders/user-orders?Page=1&PageSize=10");
@@ -73,9 +73,9 @@ public class OrdersListTests : IClassFixture<TradingPlatformFactory>
         var token = await RegisterAndLoginAsync(email, "Password123!");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        await PlaceOrderAsync("AAPL", 100, 10, OrderSide.Buy);
-        await PlaceOrderAsync("BTCUSD", 50000, 1, OrderSide.Buy);
-        await PlaceOrderAsync("MSFT", 300, 5, OrderSide.Buy);
+        await PlaceOrderAsync("AAPL", 100.25m, 10.125m, OrderSide.Buy);
+        await PlaceOrderAsync("BTCUSD", 50000.25m, 1.2345m, OrderSide.Buy);
+        await PlaceOrderAsync("MSFT", 300.50m, 5.25m, OrderSide.Buy);
 
         // Sort by Symbol Ascending
         var response = await _client.GetAsync("/api/orders/user-orders?SortingColumn=Symbol&SortingDirection=Ascending");
@@ -107,14 +107,15 @@ public class OrdersListTests : IClassFixture<TradingPlatformFactory>
         return content!.Data!.Token;
     }
 
-    private async Task PlaceOrderAsync(string symbol, long price, long quantity, OrderSide side)
+    private async Task PlaceOrderAsync(string symbol, decimal price, decimal quantity, OrderSide side)
     {
         var command = new PlaceOrderCommand
         {
             Symbol = symbol,
             Price = price,
             Quantity = quantity,
-            Side = side
+            Side = side,
+            Type = OrderType.Limit
         };
         await _client.PostAsJsonAsync("/api/orders", command);
     }

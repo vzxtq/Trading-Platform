@@ -116,13 +116,13 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
     <div className="w-full h-full flex flex-col relative">
       <div className="p-2 border-b border-border flex justify-between items-center bg-card">
         <div className="flex items-center gap-4">
-          <span className="text-xs font-bold text-foreground uppercase tracking-wider">{symbol} / USD</span>
+          <span className="text-sm font-semibold text-foreground">{symbol} / USD</span>
           <div className="flex bg-muted p-0.5 rounded-md">
             {SUPPORTED_TIMEFRAMES.map((tf) => (
               <button
                 key={tf}
                 onClick={() => setInterval(tf)}
-                className={`px-2 py-1 text-[10px] font-bold rounded-sm transition-all ${
+                className={`px-2 py-1 text-xs font-bold rounded-sm transition-all ${
                   interval === tf
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -135,14 +135,14 @@ export const PriceChart: React.FC<PriceChartProps> = ({ symbol }) => {
         </div>
         <div className="flex gap-2">
           {displayPrice !== undefined ? (
-            <span className="text-[10px] text-green-500 font-mono">${displayPrice.toFixed(2)}</span>
+            <span className="text-xs text-green-500 font-mono">${displayPrice.toFixed(2)}</span>
           ) : (
-            <span className="text-[10px] text-muted-foreground/50 font-mono">--</span>
+            <span className="text-xs text-muted-foreground/50 font-mono">--</span>
           )}
         </div>
       </div>
       {!hasData && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center text-muted-foreground/40 text-xs font-bold uppercase tracking-widest pointer-events-none">
+        <div className="absolute inset-0 z-10 flex items-center justify-center text-muted-foreground/40 text-sm font-medium pointer-events-none">
           Loading chart data...
         </div>
       )}

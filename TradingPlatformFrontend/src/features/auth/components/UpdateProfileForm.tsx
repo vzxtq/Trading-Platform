@@ -11,7 +11,7 @@ export const UpdateProfileForm = () => {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mb-16">
       <div className="flex items-center gap-3 mb-8">
         <User size={18} className="text-muted-foreground" />
-        <span className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground whitespace-nowrap">
+        <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
           Personal Information
         </span>
         <div className="h-[1px] w-full bg-border" />

@@ -33,8 +33,8 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
         // 0. Setup
         await _factory.InitializeDatabaseAsync();
         var symbol = "AAPL";
-        long price = 150;
-        long quantity = 10;
+        decimal price = 150.95m;
+        decimal quantity = 10.5m;
 
         // 1. Register two users
         var buyerEmail = $"buyer_{Guid.NewGuid()}@test.com";
@@ -60,7 +60,8 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
             Symbol = symbol,
             Price = price,
             Quantity = quantity,
-            Side = OrderSide.Buy
+            Side = OrderSide.Buy,
+            Type = OrderType.Limit
         };
         var buyResponse = await _client.PostAsJsonAsync("/api/orders", buyCommand);
         buyResponse.EnsureSuccessStatusCode();
@@ -72,7 +73,8 @@ public class PositionsAndTradesTests : IClassFixture<TradingPlatformFactory>
             Symbol = symbol,
             Price = price,
             Quantity = quantity,
-            Side = OrderSide.Sell
+            Side = OrderSide.Sell,
+            Type = OrderType.Limit
         };
         var sellResponse = await _client.PostAsJsonAsync("/api/orders", sellCommand);
         sellResponse.EnsureSuccessStatusCode();

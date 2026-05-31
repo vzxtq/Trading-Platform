@@ -11,7 +11,7 @@ export const ProfileOverview = () => {
       <h1 className="text-3xl font-bold text-foreground mb-8">Overview</h1>
       <div className="grid grid-cols-2 gap-6 mb-12">
         <div className="bg-card p-6 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Balance</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-4">Balance</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-foreground">
               {account ? formatAmount(account.balance.amount) : '0.00'}
@@ -20,7 +20,7 @@ export const ProfileOverview = () => {
           </div>
         </div>
         <div className="bg-card p-6 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Reserved</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-4">Reserved</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-amber-500">
               {account ? formatAmount(account.reservedBalance.amount) : '0.00'}
@@ -29,7 +29,7 @@ export const ProfileOverview = () => {
           </div>
         </div>
         <div className="bg-card p-6 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Available</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-4">Available</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-green-500">
               {account ? formatAmount(account.availableBalance.amount) : '0.00'}
@@ -38,7 +38,7 @@ export const ProfileOverview = () => {
           </div>
         </div>
         <div className="bg-card p-6 rounded-xl border border-border">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-4">Total P&L</span>
+          <span className="text-xs font-semibold text-muted-foreground block mb-4">Total P&L</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-bold text-green-500">+0.00</span>
             <span className="text-sm font-bold text-muted-foreground">{account?.balance.currency}</span>

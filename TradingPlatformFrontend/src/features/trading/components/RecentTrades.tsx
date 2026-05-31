@@ -17,8 +17,8 @@ export const RecentTrades: React.FC<RecentTradesProps> = ({ symbol }) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col text-[11px] font-mono overflow-hidden">
-      <div className="p-2 border-b border-border bg-muted flex justify-between text-muted-foreground font-bold uppercase tracking-wider">
+    <div className="flex-1 flex flex-col text-xs font-mono overflow-hidden">
+      <div className="p-2 border-b border-border bg-muted flex justify-between text-muted-foreground font-semibold text-xs">
         <span className="w-1/3 text-left">Price</span>
         <span className="w-1/3 text-right">Size</span>
         <span className="w-1/3 text-right">Time</span>

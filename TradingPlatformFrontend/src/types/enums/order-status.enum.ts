@@ -3,7 +3,8 @@ export enum OrderStatus {
     PartiallyFilled = "PartiallyFilled",
     Filled = "Filled", 
     Cancelled = "Cancelled", 
-    Rejected = "Rejected"
+    Rejected = "Rejected",
+    PartiallyFilledCancelled = "PartiallyFilledCancelled"
 }
 
 export const OrderStatusLabels: Record<OrderStatus, string> = {
@@ -11,5 +12,6 @@ export const OrderStatusLabels: Record<OrderStatus, string> = {
     [OrderStatus.PartiallyFilled]: "Partially Filled",
     [OrderStatus.Filled]: "Filled",
     [OrderStatus.Cancelled]: "Cancelled",
-    [OrderStatus.Rejected]: "Rejected"
+    [OrderStatus.Rejected]: "Rejected",
+    [OrderStatus.PartiallyFilledCancelled]: "Partially Filled (Cancelled)"
 };

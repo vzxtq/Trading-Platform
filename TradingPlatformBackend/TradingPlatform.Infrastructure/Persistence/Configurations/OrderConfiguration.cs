@@ -42,13 +42,13 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
             .HasForeignKey(o => o.SymbolId);
 
         // Converters and Comparers for Value Objects
-        var priceConverter = new ValueConverter<Price, decimal>(
-            v => v.Value,
-            v => v == 0 ? Price.Market() : new Price(v));
-        var priceComparer = new ValueComparer<Price>(
-            (l, r) => l!.Value == r!.Value,
-            p => p!.Value.GetHashCode(),
-            p => p!.Value == 0 ? Price.Market() : new Price(p!.Value));
+        var priceConverter = new ValueConverter<Price?, decimal?>(
+            v => v == null ? null : v.Value,
+            v => v == null ? null : new Price(v.Value));
+        var priceComparer = new ValueComparer<Price?>(
+            (l, r) => l == null && r == null || (l != null && r != null && l.Value == r.Value),
+            p => p == null ? 0 : p.Value.GetHashCode(),
+            p => p == null ? null : new Price(p.Value));
 
         var quantityConverter = new ValueConverter<Quantity, decimal>(
             v => v.Value,
@@ -64,7 +64,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<OrderDomain>
         builder.Property(o => o.Price)
                .HasColumnName("Price")
                .HasPrecision(18, 8)
-               .IsRequired();
+               .IsRequired(false);
 
         builder.Property(o => o.Quantity)
                .HasConversion(quantityConverter)

@@ -39,29 +39,29 @@ export const OrderBook: React.FC<OrderBookProps> = ({ symbol }) => {
   )
 
   return (
-    <div className="flex-1 flex flex-col text-[11px] font-mono select-none overflow-hidden">
+    <div className="flex flex-col text-xs font-mono select-none w-full shrink-0">
       {/* Header */}
       <div className="p-2 border-b border-border flex justify-between items-center bg-card shrink-0">
-        <span className="text-xs font-bold text-foreground uppercase tracking-wider">Order Book</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-bold tracking-wider">
+        <span className="text-sm font-semibold text-foreground">Order Book</span>
+        <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-bold tracking-wider">
           {symbol}
         </span>
       </div>
 
       {/* Column labels */}
-      <div className="px-2 py-1 flex justify-between text-[10px] text-muted-foreground font-bold uppercase tracking-wider border-b border-border shrink-0">
+      <div className="px-2 py-1 flex justify-between text-xs text-muted-foreground font-semibold border-b border-border shrink-0">
         <span>Price</span>
         <span>Size</span>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {/* Asks — ascending (lowest ask at bottom, nearest mid-price) */}
-        <div className="flex-1 flex flex-col justify-end overflow-hidden">
+      <div className="flex flex-col">
+        {/* Asks — lowest ask nearest spread */}
+        <div className="flex flex-col">
           {isLoading
             ? Array.from({ length: ROWS }).map((_, i) => <SkeletonRow key={i} side="ask" />)
             : asks.length === 0
             ? (
-              <div className="flex-1 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-red-500/30">
+              <div className="py-4 flex items-center justify-center text-xs font-semibold text-red-500/30">
                 No data
               </div>
             )
@@ -89,22 +89,22 @@ export const OrderBook: React.FC<OrderBookProps> = ({ symbol }) => {
         <div className="h-7 border-y border-border flex items-center justify-center gap-2 bg-muted/50 shrink-0">
           {spread !== null ? (
             <>
-              <span className="text-muted-foreground font-bold uppercase tracking-wider text-[9px]">Spread</span>
+              <span className="text-muted-foreground font-semibold text-xs">Spread</span>
               <span className="text-foreground">{spread.toFixed(2)}</span>
-              <span className="text-muted-foreground text-[9px]">({spreadPct!.toFixed(3)}%)</span>
+              <span className="text-muted-foreground text-xs">({spreadPct!.toFixed(3)}%)</span>
             </>
           ) : (
-            <span className="text-muted-foreground/40 text-[9px] uppercase tracking-widest">—</span>
+            <span className="text-muted-foreground/40 text-xs">—</span>
           )}
         </div>
 
-        {/* Bids — descending (highest bid at top) */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Bids — highest bid at top */}
+        <div className="flex flex-col">
           {isLoading
             ? Array.from({ length: ROWS }).map((_, i) => <SkeletonRow key={i} side="bid" />)
             : bids.length === 0
             ? (
-              <div className="flex-1 flex items-center justify-center text-[10px] font-bold uppercase tracking-widest text-green-500/30">
+              <div className="py-4 flex items-center justify-center text-xs font-semibold text-green-500/30">
                 No data
               </div>
             )

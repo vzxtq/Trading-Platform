@@ -55,7 +55,7 @@ public class OrderReadRepository : IOrderReadRepository
                       {
                           Status = g.Key,
                           Count = g.Count(),
-                          Volume = g.Sum(x => (x.Quantity.Value - x.RemainingQuantity.Value) * x.Price.Value)
+                          Volume = g.Sum(x => (x.Quantity.Value - x.RemainingQuantity.Value) * (x.Price != null ? x.Price.Value : 0))
                       }).ToList();
 
         var total = groups.Sum(s => s.Count);

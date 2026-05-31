@@ -73,7 +73,7 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
         {
             var context = scope.ServiceProvider.GetRequiredService<TradingDbContext>();
             var seller = await context.UserAccounts.FirstAsync(a => a.Email == "seller@test.com");
-            var position = PositionDomain.Create(seller.Id, new Symbol("BTCUSD"), new Quantity(10), 40000);
+            var position = PositionDomain.Create(seller.Id, new Symbol("BTCUSD"), new Quantity(10.75m), 40000.25m);
             context.Positions.Add(position!);
             await context.SaveChangesAsync();
         }
@@ -83,9 +83,10 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
         var buyCommand = new PlaceOrderCommand
         {
             Symbol = "BTCUSD",
-            Price = 50000,
-            Quantity = 1,
-            Side = OrderSide.Buy
+            Price = 50000.25m,
+            Quantity = 1.2345m,
+            Side = OrderSide.Buy,
+            Type = OrderType.Limit
         };
         var buyResponse = await _client.PostAsJsonAsync("/api/orders", buyCommand);
         if (!buyResponse.IsSuccessStatusCode)
@@ -99,9 +100,10 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
         var sellCommand = new PlaceOrderCommand
         {
             Symbol = "BTCUSD",
-            Price = 50000,
-            Quantity = 1,
-            Side = OrderSide.Sell
+            Price = 50000.25m,
+            Quantity = 1.2345m,
+            Side = OrderSide.Sell,
+            Type = OrderType.Limit
         };
         var sellResponse = await _client.PostAsJsonAsync("/api/orders", sellCommand);
         if (!sellResponse.IsSuccessStatusCode)
@@ -133,8 +135,8 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
             .Where(t => testUsers.Contains(t.BuyerId) || testUsers.Contains(t.SellerId))
             .ToListAsync();
         trades.Should().HaveCount(1);
-        trades[0].Price.Value.Should().Be(50000);
-        trades[0].Quantity.Value.Should().Be(1);
+        trades[0].Price.Value.Should().Be(50000.25m);
+        trades[0].Quantity.Value.Should().Be(1.2345m);
         trades[0].Symbol.Name.Should().Be("BTCUSD");
 
         // Verify Position updates
@@ -144,13 +146,13 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
 
         var sellerPos = await verifyContext.Positions.FirstOrDefaultAsync(p => p.UserId == sellerId && p.SymbolValue == btcSymbol);
         sellerPos.Should().NotBeNull();
-        sellerPos!.Quantity.Value.Should().Be(9); // 10 seeded - 1 sold
-        sellerPos.AverageCost.Should().Be(40000); // Should not change on sell
+        sellerPos!.Quantity.Value.Should().Be(9.5155m); // 10.75 seeded - 1.2345 sold
+        sellerPos.AverageCost.Should().Be(40000.25m); // Should not change on sell
 
         var buyerPos = await verifyContext.Positions.FirstOrDefaultAsync(p => p.UserId == buyerId && p.SymbolValue == btcSymbol);
         buyerPos.Should().NotBeNull();
-        buyerPos!.Quantity.Value.Should().Be(1);
-        buyerPos.AverageCost.Should().Be(50000); // 1st purchase at 50000
+        buyerPos!.Quantity.Value.Should().Be(1.2345m);
+        buyerPos.AverageCost.Should().Be(50000.25m); // 1st purchase at 50000.25
     }
 
     [Fact]
@@ -186,16 +188,16 @@ public class TradeFlowTests : IClassFixture<TradingPlatformFactory>
             var context = scope.ServiceProvider.GetRequiredService<TradingDbContext>();
             var seller = await context.UserAccounts.FirstAsync(a => a.Email == "seller_all@test.com");
             sellerId = seller.Id;
-            var position = PositionDomain.Create(sellerId, new Symbol("AAPL"), new Quantity(5), 150);
+            var position = PositionDomain.Create(sellerId, new Symbol("AAPL"), new Quantity(5.125m), 150.25m);
             context.Positions.Add(position!);
             await context.SaveChangesAsync();
         }
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", buyerToken);
-        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160, Quantity = 5, Side = OrderSide.Buy });
+        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160.75m, Quantity = 5.125m, Side = OrderSide.Buy, Type = OrderType.Limit });
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sellerToken);
-        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160, Quantity = 5, Side = OrderSide.Sell });
+        await _client.PostAsJsonAsync("/api/orders", new PlaceOrderCommand { Symbol = "AAPL", Price = 160.75m, Quantity = 5.125m, Side = OrderSide.Sell, Type = OrderType.Limit });
 
         await Task.Delay(2000);
 

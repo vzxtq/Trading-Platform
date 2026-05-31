@@ -32,7 +32,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, Result<
             UserId = order.UserId,
             SymbolName = order.Symbol.Name,
             Currency = order.Symbol.Currency,
-            Price = order.Price.Value,
+            Price = order.Price != null ? order.Price.Value : 0,
             Quantity = order.Quantity.Value,
             RemainingQuantity = order.RemainingQuantity.Value,
             Side = order.Side,

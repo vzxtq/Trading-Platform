@@ -12,7 +12,7 @@ namespace TradingEngine.Domain.Entities
         public Guid SymbolId { get; private set; }
 
         public virtual SymbolDomain Symbol { get; } = null!;
-        public Price Price { get; private set; } = null!;
+        public Price? Price { get; private set; }
 
         public Quantity Quantity { get; private set; } = null!;
         public Quantity RemainingQuantity { get; private set; } = null!;
@@ -33,7 +33,7 @@ namespace TradingEngine.Domain.Entities
         public static OrderDomain Create(
             Guid userId,
             Guid symbolId,
-            Price price,
+            Price? price,
             Quantity quantity,
             OrderSide side,
             OrderType type,
@@ -102,9 +102,9 @@ namespace TradingEngine.Domain.Entities
             RaiseDomainEvent(new OrderCancelledEvent(Id));
         }
 
-        public void ApplyStateChange(long reportedFilledQuantity, OrderStatus targetStatus)
+        public void ApplyStateChange(decimal reportedFilledQuantity, OrderStatus targetStatus)
         {
-            var alreadyFilled = (long)(Quantity.Value - RemainingQuantity.Value);
+            var alreadyFilled = Quantity.Value - RemainingQuantity.Value;
             var newlyFilled = reportedFilledQuantity - alreadyFilled;
 
             if (newlyFilled > 0)

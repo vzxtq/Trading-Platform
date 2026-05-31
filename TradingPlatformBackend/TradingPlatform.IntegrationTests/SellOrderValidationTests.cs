@@ -34,9 +34,10 @@ public class SellOrderValidationTests : IClassFixture<TradingPlatformFactory>
         var sellCommand = new PlaceOrderCommand
         {
             Symbol = "BTCUSD",
-            Price = 50000,
-            Quantity = 1,
-            Side = OrderSide.Sell
+            Price = 50000.25m,
+            Quantity = 1.2345m,
+            Side = OrderSide.Sell,
+            Type = OrderType.Limit
         };
 
         var response = await _client.PostAsJsonAsync("/api/orders", sellCommand);
@@ -59,7 +60,7 @@ public class SellOrderValidationTests : IClassFixture<TradingPlatformFactory>
         {
             var context = scope.ServiceProvider.GetRequiredService<TradingEngine.Infrastructure.Persistence.TradingDbContext>();
             var user = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstAsync(context.UserAccounts, a => a.Email == email);
-            var position = TradingEngine.Domain.Entities.PositionDomain.Create(user.Id, new TradingEngine.Domain.ValueObjects.Symbol("BTCUSD"), new TradingEngine.Domain.ValueObjects.Quantity(5), 40000);
+            var position = TradingEngine.Domain.Entities.PositionDomain.Create(user.Id, new TradingEngine.Domain.ValueObjects.Symbol("BTCUSD"), new TradingEngine.Domain.ValueObjects.Quantity(5.125m), 40000.25m);
             context.Positions.Add(position!);
             await context.SaveChangesAsync();
         }
@@ -68,9 +69,10 @@ public class SellOrderValidationTests : IClassFixture<TradingPlatformFactory>
         var sellCommand = new PlaceOrderCommand
         {
             Symbol = "BTCUSD",
-            Price = 50000,
-            Quantity = 10,
-            Side = OrderSide.Sell
+            Price = 50000.25m,
+            Quantity = 10.5m,
+            Side = OrderSide.Sell,
+            Type = OrderType.Limit
         };
 
         var response = await _client.PostAsJsonAsync("/api/orders", sellCommand);

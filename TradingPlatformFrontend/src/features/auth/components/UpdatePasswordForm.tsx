@@ -11,7 +11,7 @@ export const UpdatePasswordForm = () => {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
       <div className="flex items-center gap-3 mb-8">
         <Shield size={18} className="text-muted-foreground" />
-        <span className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground whitespace-nowrap">
+        <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">
           Security
         </span>
         <div className="h-[1px] w-full bg-border" />
@@ -42,7 +42,7 @@ export const UpdatePasswordForm = () => {
               className="bg-card border-border text-foreground h-[52px] px-4 text-base focus-visible:ring-1 focus-visible:ring-muted-foreground/30 placeholder:text-muted-foreground/30" 
             />
             {form.formState.errors.confirmPassword && (
-              <p className="text-destructive text-xs font-bold mt-2 uppercase tracking-tight">
+              <p className="text-destructive text-sm font-medium mt-2">
                 {form.formState.errors.confirmPassword.message}
               </p>
             )}
