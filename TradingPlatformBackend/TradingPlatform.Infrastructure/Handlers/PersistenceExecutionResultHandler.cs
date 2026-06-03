@@ -159,15 +159,29 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
                     "Processing state change for order {OrderId}: {Status}, Filled: {Filled}",
                     stateChange.OrderId, stateChange.Status, stateChange.FilledQuantity);
 
+                // Capture the status before applying changes so we can detect whether
+                // this handler is actually the one performing the cancellation.
+                // CancelOrderCommandHandler commits Cancelled to the DB before enqueuing
+                // to the engine, so when the engine echoes back the cancel result the
+                // order is already Cancelled here — we must not release funds a second time.
+                var statusBeforeChange = order.Status;
+
                 order.ApplyStateChange(stateChange.FilledQuantity.ToDomainQuantity(), stateChange.Status);
 
-                if (order.Side == OrderSide.Buy
+                var isCancellingNow = statusBeforeChange != OrderStatus.Cancelled
+                    && statusBeforeChange != OrderStatus.PartiallyFilledCancelled;
+
+                if (isCancellingNow
+                    && order.Side == OrderSide.Buy
                     && (stateChange.Status == OrderStatus.Cancelled || stateChange.Status == OrderStatus.PartiallyFilledCancelled)
                     && stateChange.RemainingQuantity > 0)
                 {
-                    var spentInPreviousBatches = await _dbContext.Trades
+                    var previousTrades = await _dbContext.Trades
                         .Where(t => t.BuyOrderId == order.Id)
-                        .SumAsync(t => t.Price.Value * t.Quantity.Value, cancellationToken);
+                        .Select(t => new { PriceValue = t.Price.Value, QuantityValue = t.Quantity.Value })
+                        .ToListAsync(cancellationToken);
+
+                    var spentInPreviousBatches = previousTrades.Sum(t => t.PriceValue * t.QuantityValue);
 
                     var spentInThisBatch = accepted.Trades
                         .Where(t => t.BuyOrderId == order.Id)
@@ -181,7 +195,8 @@ public sealed class PersistenceExecutionResultHandler : IExecutionResultHandler
 
                     accounts[order.UserId].ReleaseReservedFunds(release);
                 }
-                else if (order.Side == OrderSide.Sell
+                else if (isCancellingNow
+                    && order.Side == OrderSide.Sell
                     && (stateChange.Status == OrderStatus.Cancelled || stateChange.Status == OrderStatus.PartiallyFilledCancelled)
                     && stateChange.RemainingQuantity > 0)
                 {

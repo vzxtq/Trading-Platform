@@ -3,26 +3,36 @@ import axios from "axios"
 
 export const handleApiError = (error: unknown) => {
   if (axios.isAxiosError(error)) {
-    const data = error.response?.data as any
     const status = error.response?.status
 
-    // Extract message from our standard ApiResponse structure
+    // 5xx — never expose backend internals to the user.
+    if (status && status >= 500) {
+      toast.error("Something went wrong", {
+        description: "Please try again later.",
+      })
+      return
+    }
+
+    const data = error.response?.data as any
+
+    // 4xx with our standard ApiResponse structure — these are intentional
+    // business errors the backend explicitly chose to surface.
     if (data?.message || (data?.errors && data.errors.length > 0)) {
       const message = data.message || "Action failed"
-      const details = Array.isArray(data.errors) 
-        ? data.errors.join(". ") 
-        : typeof data.errors === 'string' ? data.errors : undefined
-        
-      toast.error(message, {
-        description: details,
-      })
+      const details = Array.isArray(data.errors)
+        ? data.errors.join(". ")
+        : typeof data.errors === "string"
+        ? data.errors
+        : undefined
+
+      toast.error(message, { description: details })
       return
     }
 
     // Handle standard Problem Details (RFC 7807) used by .NET
     if (data?.title || data?.detail) {
       toast.error(data.title || "Error", {
-        description: data.detail || (data.errors ? JSON.stringify(data.errors) : undefined)
+        description: data.detail || (data.errors ? JSON.stringify(data.errors) : undefined),
       })
       return
     }
@@ -32,7 +42,7 @@ export const handleApiError = (error: unknown) => {
         toast.error("Invalid Request", { description: "The server could not understand the request." })
         break
       case 401:
-        // Silently handled by auth interceptor usually
+        // Silently handled by auth interceptor
         break
       case 402:
         toast.error("Insufficient Funds", { description: "You don't have enough balance for this operation." })
@@ -49,18 +59,13 @@ export const handleApiError = (error: unknown) => {
       case 429:
         toast.error("Too Many Requests", { description: "Please slow down and try again later." })
         break
-      case 500:
-      case 502:
-      case 503:
-      case 504:
-        toast.error("Server Error", { description: "Something went wrong on our side. We're looking into it." })
-        break
       default:
         toast.error("Network Error", { description: "Please check your connection or try again later." })
     }
   } else {
-    toast.error("Unexpected Error", {
-      description: error instanceof Error ? error.message : "Something went wrong"
+    // Non-Axios errors (JS exceptions, etc.) — never expose internal messages.
+    toast.error("Something went wrong", {
+      description: "Please try again later.",
     })
   }
 }
