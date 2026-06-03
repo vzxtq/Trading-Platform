@@ -41,9 +41,6 @@ public sealed class TradeReadRepository : ITradeReadRepository
 
     public async Task<decimal> GetTotalSpentOnBuyOrderAsync(Guid orderId, CancellationToken ct)
     {
-        // EF Core cannot translate the multiplication of two value-object properties
-        // (Price.Value * Quantity.Value) in a single SumAsync expression.
-        // Project each scalar column individually first, then multiply client-side.
         var rows = await (from t in _dbContext.Trades.AsNoTracking()
                           where t.BuyOrderId == orderId
                           select new { PriceValue = t.Price.Value, QuantityValue = t.Quantity.Value })

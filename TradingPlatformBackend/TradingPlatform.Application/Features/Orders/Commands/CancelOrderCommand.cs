@@ -84,7 +84,6 @@ public sealed class CancelOrderCommandHandler : ICommandHandler<CancelOrderComma
                     var account = await _accountRepository.GetByIdAsync(order.UserId, ct);
                     if (account is not null)
                     {
-                        // For partially-filled orders, only the unfilled portion is still reserved.
                         var totalSpent = await _tradeReadRepository.GetTotalSpentOnBuyOrderAsync(order.Id, ct);
                         var releaseAmount = Math.Max(0m, order.ReservedAmount - totalSpent);
 
@@ -119,8 +118,6 @@ public sealed class CancelOrderCommandHandler : ICommandHandler<CancelOrderComma
         }
 
         // Notify the engine to remove the order from its in-memory book if it is still there.
-        // This is best-effort: if the engine does not find the order it returns Rejected,
-        // which is harmless because the DB is already committed above.
         var cancelCommand = new MatchingEngine.Commands.CancelOrderCommand
         {
             OrderId = order.Id,
